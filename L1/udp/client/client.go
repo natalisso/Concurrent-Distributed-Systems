@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -18,25 +19,26 @@ func checkError(err error) {
 	}
 }
 
-func sendMenssage(conn *net.UDPConn) {
+func sendMessage(conn *net.UDPConn, name string) {
+	log.Println("Type 'join' to participate :)")
 	for {
 		reader := bufio.NewReader(os.Stdin)
-		log.Printf("Write a message: ")
 		text, _ := reader.ReadString('\n')
+		text = strings.Replace(text, "\n", "", 1)
+		text = name + ": " + text
 		message := []byte(text)
 		_, err := conn.Write(message)
 		checkError(err)
 	}
 }
 
-func receiveMenssage(conn *net.UDPConn) {
+func receiveMessage(conn *net.UDPConn) {
 	buffer := make([]byte, 1024)
 
 	for {
-		n, addr, err := conn.ReadFromUDP(buffer)
+		n, _, err := conn.ReadFromUDP(buffer)
 		checkError(err)
-		fmt.Println("UDP Server : ", addr)
-		fmt.Println("Received from UDP server : ", string(buffer[:n]))
+		fmt.Println(string(buffer[:n]))
 	}
 }
 
@@ -44,48 +46,38 @@ func main() {
 	/* 	hostName := "localhost"
 	   	portNum := "6000" */
 
+	// pego o endereço do comando do terminal
 	if len(os.Args) != 2 {
 		fmt.Fprintf(os.Stderr, "Usage: %s host:port", os.Args[0])
 		os.Exit(1)
 	}
-
 	service := os.Args[1]
 
 	RemoteAddr, err := net.ResolveUDPAddr("udp", service)
 	checkError(err)
 
-	//LocalAddr := nil
-	// see https://golang.org/pkg/net/#DialUDP
+	//LocalAddr := nil; https://golang.org/pkg/net/#DialUDP
 
 	conn, err := net.DialUDP("udp", nil, RemoteAddr)
 	checkError(err)
-	// note : you can use net.ResolveUDPAddr for LocalAddr as well
-	//        for this tutorial simplicity sake, we will just use nil
 
 	log.Printf("Established connection to %s \n", service)
 	log.Printf("Remote UDP address : %s \n", conn.RemoteAddr().String())
 	log.Printf("Local UDP client address : %s \n", conn.LocalAddr().String())
-	log.Printf("------------------ Welcome to the Chat! :) -----------------------")
 
+	reader := bufio.NewReader(os.Stdin)
+	log.Printf("Type your name: ")
+	name, _ := reader.ReadString('\n')
+	name = strings.Replace(name, "\n", "", 1)
+
+	log.Printf("Welcome to the Chat, " + name + "! :)")
 	defer conn.Close()
 
-	/* // write a message to server
-	message := []byte("Hello UDP server!")
-	_, err = conn.Write(message) */
+	// write a message to server
+	wg.Add(1) // impedir que a thread main acabe antes que as outras
+	go sendMessage(conn, name)
 	wg.Add(1)
-	go sendMenssage(conn)
-	wg.Add(1)
-	go receiveMenssage(conn)
+	go receiveMessage(conn)
 	wg.Wait()
-	/* if err != nil {
-		log.Println(err)
-	} */
-
-	// receive message from server
-	/* 	buffer := make([]byte, 1024)
-	   	n, addr, err := conn.ReadFromUDP(buffer)
-
-	   	fmt.Println("UDP Server : ", addr)
-	   	fmt.Println("Received from UDP server : ", string(buffer[:n])) */
-
+	
 }
