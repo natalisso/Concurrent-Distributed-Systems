@@ -1,39 +1,111 @@
 package main
 
-import "net"
-import "os"
-import "fmt"
-import "bufio"
+import (
+	"net"
+	"os"
+	"fmt"
+	"sync"
+	"bufio"
+)
+
+var wg = &sync.WaitGroup{}
+
+func checkError(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+		os.Exit(1)
+	}
+}
+
+func sendMessage(conn net.Conn){
+	for{
+		// Lendo entrada do teclado
+		reader := bufio.NewReader(os.Stdin)
+		menssage, err := reader.ReadString('\n')
+		checkError(err)
+
+		if menssage == "STOP\n"{
+			fmt.Fprintf(conn, "STOP "+menssage+"\n")
+			break
+		}
+		// Escrevendo a mensagem na conexão
+		fmt.Fprintf(conn, "MSG "+menssage+"\n")
+	}
+	wg.Done()
+}
+
+func receiveMessage(conn net.Conn) {
+	for{
+		// Ouvindo a resposta do servidor
+		menssage, err := bufio.NewReader(conn).ReadString('\n')
+		checkError(err)
+
+		// Escrevendo a resposta do servidor no terminal
+		if menssage == "STOP\n"{
+			fmt.Print("stop client!")
+			break
+		}
+		fmt.Printf(menssage)	
+	}
+	wg.Done()
+}
+
+func getName(conn net.Conn){
+	fmt.Printf("Type your name: ")
+	reader := bufio.NewReader(os.Stdin)
+	text, err := reader.ReadString('\n')
+	checkError(err)
+
+	fmt.Fprintf(conn, "NAME "+text+"\n")
+
+	menssage, err := bufio.NewReader(conn).ReadString('\n')
+	checkError(err)
+	fmt.Printf(menssage)
+}
+
+func startChat(conn net.Conn){
+	fmt.Println("Type 'JOIN' to participate :)")
+
+	reader := bufio.NewReader(os.Stdin)
+	text, err := reader.ReadString('\n')
+	checkError(err)
+	fmt.Print(text)
+	if text == "JOIN\n" {
+		fmt.Fprintf(conn, "JOIN \n")
+	}else{
+		fmt.Println("errouuu")
+		fmt.Fprintf(conn, "ERR \n")
+	}
+}
 
 func main() {
 
-	// conectando na porta 8081 via protocolo tcp/ip na máquina local
-	conexao, erro1 := net.Dial("tcp", "127.0.0.1:8080")
-	if erro1 != nil {
-		fmt.Println(erro1)
-		os.Exit(3)
+	// Servidor na máquina local na porta 8080 (default)
+	server := "127.0.0.1:8081"
+	// Pego o endereço ip e a porta do servidor caso tenham sido passados como argumento
+	if len(os.Args) == 2 {
+		server = os.Args[1]	
 	}
 
-	for {
-		// lendo entrada do terminal
-		leitor := bufio.NewReader(os.Stdin)
-		fmt.Print("texto a ser enviado: ")
-		texto, erro2 := leitor.ReadString('\n')
-		if erro2 != nil {
-			fmt.Println(erro2)
-			os.Exit(3)
-		}
+	// Conectando ao servidor
+	conn, err := net.Dial("tcp", server)
+	checkError(err)
 
-		// escrevendo a mensagem na conexão
-		fmt.Fprintf(conexao, texto+"\n")
+	getName(conn)
+	startChat(conn)
 
-		// ouvindo a resposta do servidor
-		mensagem, err3 := bufio.NewReader(conexao).ReadString('\n')
-		if err3 != nil {
-			fmt.Println(err3)
-			os.Exit(3)
-		}
-		// escrevendo a resposta do servidor no terminal
-		fmt.Print("Resposta do servidor: " + mensagem)
+	received, err := bufio.NewReader(conn).ReadString('\n')
+	checkError(err)
+	for received == "Unknown command!\n"{
+		startChat(conn)
+		received, err = bufio.NewReader(conn).ReadString('\n')
+		checkError(err)
 	}
+
+	wg.Add(1)
+	go sendMessage(conn)
+	wg.Add(1)
+	go receiveMessage(conn)
+	wg.Wait()
+		
 }
