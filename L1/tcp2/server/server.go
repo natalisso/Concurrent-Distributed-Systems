@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strings"
+	// "strings"
 	"math/rand"
 	"time"
 	"os"
@@ -30,12 +30,13 @@ func checkError(err error) {
 
 func receiveMessage(user *client) string {
 	// Recebe o nome do client
-	name, err := (*user).reader.ReadString('\n')
+	msg, err := (*user).reader.ReadString('\n')
 	checkError(err)
+	// fmt.Println(msg)
 
-	(*user).name = strings.Replace(name, "\n", "", 1)
+	// (*user).name = strings.Replace(msg, "\n", "", 1)
 
-	return name
+	return msg
 	// return "Hello " + (*user).name + "!\n"
 }
 
@@ -48,7 +49,7 @@ func handleConn(conn net.Conn){
 	user := client{"",conn,bufio.NewReader(conn)}
 
 	// open output file
-	nameDataBase := "dataBase" + conn.RemoteAddr().String() + ".txt"
+	nameDataBase := "./data_bases/dataBase" + conn.RemoteAddr().String() + ".txt"
     dataBase, err := os.Create(nameDataBase)
     if err != nil {
 		panic(err)
@@ -62,13 +63,17 @@ func handleConn(conn net.Conn){
 		
 		stp := true
 		for stp{
+			// user.reader = bufio.NewReader(conn)
 			commandName, err := user.reader.ReadString(' ')
 			checkError(err)
 			
 			fmt.Println("cmd = ",commandName)
 			switch commandName {
 			case "MSG ":
-				data := receiveMessage(&user)
+				data, err := user.reader.ReadString('\n')
+				checkError(err)
+				fmt.Println(data)
+				// data := receiveMessage(&user)
 				t := time.Now().UTC()
 				if _, err := dataBase.Write([]byte(t.Format("2006-01-02 15:04:05") + " -> " + data)); err != nil {
 					panic(err)
@@ -76,6 +81,14 @@ func handleConn(conn net.Conn){
 				logMsg := "Data Stored!\n"
 				sendMessage(&user,logMsg)
 			case "STOP ":
+				data, err := user.reader.ReadString('\n')
+				checkError(err)
+				fmt.Println(data)
+				// data := receiveMessage(&user)
+				t := time.Now().UTC()
+				if _, err := dataBase.Write([]byte(t.Format("2006-01-02 15:04:05") + " -> " + data)); err != nil {
+					panic(err)
+				}
 				stopSign := "STOP\n"
 				sendMessage(&user,stopSign)
 				conn.Close()

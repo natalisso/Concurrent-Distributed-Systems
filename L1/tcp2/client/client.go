@@ -7,7 +7,8 @@ import (
 	"log"
 	"os"
 	"strings"
-	// "time"
+	"strconv"
+	"time"
 )
 
 type client struct {
@@ -35,15 +36,12 @@ func getName(user *client){
 }
 
 func sendMessage(user *client, msg string){
-	if msg == "STOP"{
-		_,err := (*user).conn.Write([]byte(string("STOP \n")))
-		checkError(err)
-	}else{
+
 		// getName(user)
 		// (*user).name = strings.Replace(msg, "\n", "", 1)
-		_,err := (*user).conn.Write([]byte(string("MSG " + msg)))
+		_,err := (*user).conn.Write([]byte(msg))
 		checkError(err)
-	}
+	
 }
 
 func receiveMessage(user *client){
@@ -56,7 +54,7 @@ func receiveMessage(user *client){
 
 func main() {
 	// Servidor na máquina local na porta 8080 (default)
-	server := "127.0.0.1:8080"
+	server := "172.22.69.224:8080"
 	// Pego o endereço ip e a porta do servidor caso tenham sido passados como argumento
 	if len(os.Args) == 2 {
 		server = os.Args[1]	
@@ -71,18 +69,21 @@ func main() {
 	user := client{"nat",conn,bufio.NewReader(conn)}
 	// getName(&user)
 
-	for i:=0; i < 5; i++{
-		if i == 4{
-			// time1 := time.Now()
-			sendMessage(&user,"STOP")
+	// Mandando o nome
+	sendMessage(&user,"MSG " + user.name+"\n")
+	receiveMessage(&user)
+
+	x := 0.0000000
+	for i:=0; i <= 6; i++{
+		if i == 6{
+			sendMessage(&user,"STOP " + strconv.FormatFloat(x,'f',6,64) +"\n")
 			receiveMessage(&user)
-			// time2 := time.Now()
-			// x := (float64) time2.Sub(time1).Nanoseconds / 1E6
 		}else{
-			sendMessage(&user,user.name+"\n")
+			time1 := time.Now()
+			sendMessage(&user,"MSG " + strconv.FormatFloat(x,'f',6,64) +"\n")
 			receiveMessage(&user)
+			time2 := time.Now()
+			x = float64(time2.Sub(time1).Nanoseconds()) / 1E6
 		}
-
 	}
-
 }
