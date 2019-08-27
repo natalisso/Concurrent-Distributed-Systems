@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"fmt"
+	//"fmt"
 	"log"
 	"net"
 	// "strings"
@@ -45,7 +45,7 @@ func sendMessage(user *client, msg string){
 }
 
 func handleConn(conn net.Conn){
-	log.Printf("Serving %s\n", conn.RemoteAddr().String())
+	// log.Printf("Serving %s\n", conn.RemoteAddr().String())
 	user := client{"",conn,bufio.NewReader(conn)}
 
 	// open output file
@@ -67,12 +67,12 @@ func handleConn(conn net.Conn){
 			commandName, err := user.reader.ReadString(' ')
 			checkError(err)
 			
-			fmt.Println("cmd = ",commandName)
+			// fmt.Println("cmd = ",commandName)
 			switch commandName {
 			case "MSG ":
 				data, err := user.reader.ReadString('\n')
 				checkError(err)
-				fmt.Println(data)
+				// fmt.Println(data)
 				// data := receiveMessage(&user)
 				t := time.Now().UTC()
 				if _, err := dataBase.Write([]byte(t.Format("2006-01-02 15:04:05") + " -> " + data)); err != nil {
@@ -83,7 +83,7 @@ func handleConn(conn net.Conn){
 			case "STOP ":
 				data, err := user.reader.ReadString('\n')
 				checkError(err)
-				fmt.Println(data)
+				// fmt.Println(data)
 				// data := receiveMessage(&user)
 				t := time.Now().UTC()
 				if _, err := dataBase.Write([]byte(t.Format("2006-01-02 15:04:05") + " -> " + data)); err != nil {
@@ -99,13 +99,13 @@ func handleConn(conn net.Conn){
 				stp = false
 			}
 	}
-	fmt.Println("out loop!")
+	// fmt.Println("out loop!")
 	return
 }
 
 func main() {
 	// Inicializa o servidor na porta 8080 e protocolo TCP 
-	fmt.Println("Server waiting for connections...")
+	// fmt.Println("Server waiting for connections...")
 	port := ":8080"
 	l, err1 := net.Listen("tcp", port)
 	checkError(err1)
