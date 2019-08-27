@@ -25,11 +25,11 @@ func sendMessage(conn net.Conn){
 		checkError(err)
 
 		if menssage == "STOP\n"{
-			fmt.Fprintf(conn, "STOP "+menssage+"\n")
-			break
+			conn.Write([]byte(string("STOP \n")))
+			bresync.WaitGroup{}ak
 		}
 		// Escrevendo a mensagem na conexão
-		fmt.Fprintf(conn, "MSG "+menssage+"\n")
+		conn.Write([]byte(string("MSG "+menssage+"\n")))
 	}
 	wg.Done()
 }
@@ -56,7 +56,7 @@ func getName(conn net.Conn){
 	text, err := reader.ReadString('\n')
 	checkError(err)
 
-	fmt.Fprintf(conn, "NAME "+text+"\n")
+	conn.Write([]byte(string("NAME "+text+"\n")))
 
 	menssage, err := bufio.NewReader(conn).ReadString('\n')
 	checkError(err)
@@ -71,10 +71,10 @@ func startChat(conn net.Conn){
 	checkError(err)
 	fmt.Print(text)
 	if text == "JOIN\n" {
-		fmt.Fprintf(conn, "JOIN \n")
+		conn.Write([]byte(string("JOIN \n")))
 	}else{
 		fmt.Println("errouuu")
-		fmt.Fprintf(conn, "ERR \n")
+		conn.Write([]byte(string("ERR \n")))
 	}
 }
 

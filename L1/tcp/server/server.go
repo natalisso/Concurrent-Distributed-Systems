@@ -19,12 +19,19 @@ type client struct {
 
 var mutex = &sync.Mutex{}
 
-func checkError(err error) {
+func checkError(err error) bool{
 	// Verificação de erros durante a troca de menssagens
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s", err.Error())
-		return
+		return false
+	}else if err.Error() == "EOF cmd"{
+		fmt.Println(err)
+		return true
+	}else{
+		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+		os.Exit(1)
 	}
+	return false
 }
 
 func wannaJoin(curClient *client, users *[] client){
@@ -82,7 +89,10 @@ func handleConnection(conn net.Conn, users *[] client) {
 	for stp{
 		user.reader = bufio.NewReader(conn)
 		commandName, err := user.reader.ReadString(' ')
-		checkError(err)
+		ck := checkError(err)
+		if ck == true && len(*users) == 1{
+			stp = false
+		}
 		fmt.Println("cmd = ",commandName)
 		switch commandName {
 		case "NAME ":
@@ -116,10 +126,10 @@ func main() {
 	l, err1 := net.Listen("tcp", port)
 	checkError(err1)
 
-	// Fecha o socket
+	// Fecha o socket na saida
 	defer l.Close()
 
-	// Lida com a questão da concorrência
+		// Lida com a questão da concorrência
 	rand.Seed(time.Now().Unix())
 	var users [] client
 
