@@ -32,74 +32,71 @@ func receiveMessage(user *client) string {
 	// Recebe o nome do client
 	msg, err := (*user).reader.ReadString('\n')
 	checkError(err)
-	// fmt.Println(msg)
-
-	// (*user).name = strings.Replace(msg, "\n", "", 1)
 
 	return msg
-	// return "Hello " + (*user).name + "!\n"
 }
 
 func sendMessage(user *client, msg string){
 	(*user).conn.Write([]byte(string(msg)))	
 }
 
+func writeFile(user *client, data string, logMsg string, dataBase *os.File){
+	t := time.Now().UTC()
+	if _, err := dataBase.Write([]byte(t.Format("2006-01-02 15:04:05") + " -> " + data)); err != nil {
+		// Retorna uma mensagem de status negativo em caso de erro
+		logMsg = err.Error()
+		sendMessage(user,logMsg)
+		panic(err)
+	}
+
+	// Retorna uma mensagem de status possitivo
+	sendMessage(user,logMsg)
+}
 func handleConn(conn net.Conn){
 	// log.Printf("Serving %s\n", conn.RemoteAddr().String())
 	user := client{"",conn,bufio.NewReader(conn)}
 
-	// open output file
+	// Abre arquivo de saida 
 	nameDataBase := "./data_bases/dataBase" + conn.RemoteAddr().String() + ".txt"
     dataBase, err := os.Create(nameDataBase)
     if err != nil {
 		panic(err)
     }
-    // close fo on exit and check for its returned error
+    // Fecha o arquivo de saída no final da execução da função e verifica os erros retornados
     defer func() {
 		if err := dataBase.Close(); err != nil {
 			panic(err)
         }
-		}()
+	}()
 		
-		stp := true
-		for stp{
-			// user.reader = bufio.NewReader(conn)
-			commandName, err := user.reader.ReadString(' ')
-			checkError(err)
-			
-			// fmt.Println("cmd = ",commandName)
-			switch commandName {
-			case "MSG ":
-				data, err := user.reader.ReadString('\n')
-				checkError(err)
-				// fmt.Println(data)
-				// data := receiveMessage(&user)
-				t := time.Now().UTC()
-				if _, err := dataBase.Write([]byte(t.Format("2006-01-02 15:04:05") + " -> " + data)); err != nil {
-					panic(err)
-				}
-				logMsg := "Data Stored!\n"
-				sendMessage(&user,logMsg)
-			case "STOP ":
-				data, err := user.reader.ReadString('\n')
-				checkError(err)
-				// fmt.Println(data)
-				// data := receiveMessage(&user)
-				t := time.Now().UTC()
-				if _, err := dataBase.Write([]byte(t.Format("2006-01-02 15:04:05") + " -> " + data)); err != nil {
-					panic(err)
-				}
-				stopSign := "STOP\n"
-				sendMessage(&user,stopSign)
-				conn.Close()
-				stp = false
-			default:
-				errMsg := "Unknown command!\n"
-				sendMessage(&user,errMsg)
-				stp = false
-			}
+	stp := true
+	for stp{
+		commandName, err := user.reader.ReadString(' ')
+		checkError(err)
+		
+		switch commandName {
+		case "MSG ":
+			// Recebe os dados
+			data := receiveMessage(&user)
+
+			// Escreve no arquivo o dado recebido, verificando possíveis erros na escrita
+			writeFile(&user,data,"Data Stored!\n",dataBase)
+		case "STOP ":
+			// Recebe os dados
+			data := receiveMessage(&user)
+
+			// Escreve no arquivo o dado recebido, verificando possíveis erros na escrita
+			writeFile(&user,data,"STOP\n",dataBase)
+
+			// Fecha a conexão e encerra o hadle desse client
+			conn.Close()
+			stp = false
+		default:
+			errMsg := "Unknown command!\n"
+			sendMessage(&user,errMsg)
+			stp = false
+		}
 	}
-	// fmt.Println("out loop!")
 	return
 }
 
@@ -110,7 +107,7 @@ func main() {
 	l, err1 := net.Listen("tcp", port)
 	checkError(err1)
 
-	// Fecha o socket na saida
+	// Fecha o socket no final da execução
 	defer l.Close()
 
 	// Lida com a questão da concorrência
@@ -121,7 +118,7 @@ func main() {
 		conn, err2 := l.Accept()
 		checkError(err2)
 
-		// fmt.Println(STOPSERVER)
+		// Lida com a requisição do client em uma goroutine
 		go handleConn(conn)
 	}
 }

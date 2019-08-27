@@ -39,10 +39,19 @@ func getName(user *client){
 
 }
 
+func getData(user *client) string{
+	fmt.Printf("Entry the data: ")
+
+	reader := bufio.NewReader(os.Stdin)
+	data, err := reader.ReadString('\n')
+	checkError(err)
+
+	return data
+}
+
 func sendMessage(user *client, msg string){
 
-		// getName(user)
-		// (*user).name = strings.Replace(msg, "\n", "", 1)
+		//msg := getData(user)
 		_,err := (*user).conn.Write([]byte(msg))
 		checkError(err)
 	
@@ -53,7 +62,7 @@ func receiveMessage(user *client){
 	checkError(err)
 
 	// Escrevendo a resposta do servidor no terminal
-	// fmt.Printf(menssage)	
+	//fmt.Printf(menssage)	
 }
 
 func runClient(clientName string, server string) {
@@ -61,13 +70,13 @@ func runClient(clientName string, server string) {
 	conn, err := net.Dial("tcp", server)
 	checkError(err)
 	
-	// fmt.Printf("Connected to server at %s!\n",server)
+	//fmt.Printf("Connected to server at %s!\n",server)
 
 	user := client{clientName,conn,bufio.NewReader(conn)}
-	// getName(&user)
+	//getName(&user)
 
 	// Mandando o nome
-	sendMessage(&user,"MSG " + user.name+"\n")
+	sendMessage(&user,"MSG " + user.name + "\n")
 	receiveMessage(&user)
 
 	x := float64(NUMCLIENTS)
@@ -90,19 +99,19 @@ func main(){
 	// Servidor na máquina local na porta 8080 (default)
 	server := "127.0.0.1:8080" 
 
-	// Pego o endereço ip e a porta do servidor caso tenham sido passados como argumento 
+	// Pego o numero de clients e o endereço ip e a porta do servidor caso tenham sido passados como argumento 
 	if len(os.Args) == 2 {
-		// server = os.Args[1]	
 		NUMCLIENTS,_ = strconv.Atoi(os.Args[1])
+	}else if len(os.Args) == 3{
+		NUMCLIENTS,_ = strconv.Atoi(os.Args[1])
+		server = os.Args[2]	
 	}
 	
+	// Inicializando as threads dos clients 
+	nome := "nome"
 	wg.Add(NUMCLIENTS)
 	for i:=0; i < NUMCLIENTS; i++{
-		go runClient("nome",server)
+		go runClient(nome,server)
 	}
-	// go runClient("matheus",server)
-	// go runClient("victor",server)
-	// go runClient("gustavo",server)
-	// go runClient("daniel",server)
 	wg.Wait()
 }
