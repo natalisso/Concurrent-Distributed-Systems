@@ -6,78 +6,102 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var wg = &sync.WaitGroup{}
+var NUMCLIENTS = 5
+
+type client struct {
+	name   string
+	conn   *net.UDPConn
+	reader *bufio.Reader
+}
 
 func checkError(err error) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+		log.Printf("Fatal error: %s", err.Error())
 		os.Exit(1)
 	}
 }
 
-func sendMessage(conn *net.UDPConn, name string) {
-	log.Println("Type 'join' to participate :)")
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		text, _ := reader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", 1)
-		text = name + ": " + text
-		message := []byte(text)
-		_, err := conn.Write(message)
-		checkError(err)
-	}
+func getName(user *client) {
+	fmt.Printf("Type your name: ")
+
+	reader := bufio.NewReader(os.Stdin)
+	name, err := reader.ReadString('\n')
+	checkError(err)
+
+	(*user).name = strings.Replace(name, "\n", "", 1)
+
 }
 
-func receiveMessage(conn *net.UDPConn) {
-	buffer := make([]byte, 1024)
+func sendMessage(user *client, msg string) {
 
-	for {
-		n, _, err := conn.ReadFromUDP(buffer)
-		checkError(err)
-		fmt.Println(string(buffer[:n]))
+	_, err := (*user).conn.Write([]byte(msg))
+
+	checkError(err)
+}
+
+func receiveMessage(user *client) {
+	msgFromServer := make([]byte, 1024)
+	(*user).conn.ReadFromUDP(msgFromServer)
+
+	// Escrevendo a resposta do servidor no terminal
+	//fmt.Printf(string(msgFromServer))
+}
+
+func runClient(clientName string, server string) {
+	RemoteAddr, err := net.ResolveUDPAddr("udp", server)
+	checkError(err)
+
+	// Conectando ao servidor
+	conn, err := net.DialUDP("udp", nil, RemoteAddr)
+	checkError(err)
+	//fmt.Printf("Connected to server at %s!\n", server)
+
+	user := client{clientName, conn, bufio.NewReader(conn)}
+
+	// Mandando o nome
+	sendMessage(&user, "MSG "+user.name+"\n")
+	receiveMessage(&user)
+
+	x := float64(NUMCLIENTS)
+	for i := 0; i <= 1E4; i++ {
+		if i == 1E4 {
+			sendMessage(&user, "STOP "+strconv.FormatFloat(x, 'f', 6, 64)+"\n")
+			receiveMessage(&user)
+		} else {
+			time1 := time.Now()
+			sendMessage(&user, "MSG "+strconv.FormatFloat(x, 'f', 6, 64)+"\n")
+			receiveMessage(&user)
+			time2 := time.Now()
+			x = float64(time2.Sub(time1).Nanoseconds()) / 1E6
+		}
 	}
+	wg.Done()
 }
 
 func main() {
-	/* 	hostName := "localhost"
-	   	portNum := "6000" */
+	// Servidor na máquina local na porta 8080 (default)
+	server := "localhost:8080"
 
-	// pego o endereço do comando do terminal
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "Usage: %s host:port", os.Args[0])
-		os.Exit(1)
+	// Pego o numero de clients e o endereço ip e a porta do servidor caso tenham sido passados como argumento
+	if len(os.Args) == 2 {
+		NUMCLIENTS, _ = strconv.Atoi(os.Args[1])
+	} else if len(os.Args) == 3 {
+		NUMCLIENTS, _ = strconv.Atoi(os.Args[1])
+		server = os.Args[2]
 	}
-	service := os.Args[1]
 
-	RemoteAddr, err := net.ResolveUDPAddr("udp", service)
-	checkError(err)
-
-	//LocalAddr := nil; https://golang.org/pkg/net/#DialUDP
-
-	conn, err := net.DialUDP("udp", nil, RemoteAddr)
-	checkError(err)
-
-	log.Printf("Established connection to %s \n", service)
-	log.Printf("Remote UDP address : %s \n", conn.RemoteAddr().String())
-	log.Printf("Local UDP client address : %s \n", conn.LocalAddr().String())
-
-	reader := bufio.NewReader(os.Stdin)
-	log.Printf("Type your name: ")
-	name, _ := reader.ReadString('\n')
-	name = strings.Replace(name, "\n", "", 1)
-
-	log.Printf("Welcome to the Chat, " + name + "! :)")
-	defer conn.Close()
-
-	// write a message to server
-	wg.Add(1) // impedir que a thread main acabe antes que as outras
-	go sendMessage(conn, name)
-	wg.Add(1)
-	go receiveMessage(conn)
+	/// Inicializando as threads dos clients
+	nome := "nome"
+	wg.Add(NUMCLIENTS)
+	for i := 0; i < NUMCLIENTS; i++ {
+		go runClient(nome, server)
+	}
 	wg.Wait()
-	
 }

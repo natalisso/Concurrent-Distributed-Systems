@@ -1,1 +1,0 @@
-go run client localhost:6000
