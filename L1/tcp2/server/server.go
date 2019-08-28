@@ -42,7 +42,7 @@ func sendMessage(user *client, msg string){
 
 func writeFile(user *client, data string, logMsg string, dataBase *os.File){
 	t := time.Now().UTC()
-	if _, err := dataBase.Write([]byte(t.Format("2006-01-02 15:04:05") + " -> " + data)); err != nil {
+	if _, err := dataBase.Write([]byte(t.Format("2006,01,02") + "," + data)); err != nil {
 		// Retorna uma mensagem de status negativo em caso de erro
 		logMsg = err.Error()
 		sendMessage(user,logMsg)
@@ -57,7 +57,7 @@ func handleConn(conn net.Conn){
 	user := client{"",conn,bufio.NewReader(conn)}
 
 	// Abre arquivo de saida 
-	nameDataBase := "./data_bases/dataBase" + conn.RemoteAddr().String() + ".txt"
+	nameDataBase := "./data_bases/dataBase" + conn.RemoteAddr().String() + ".csv"
     dataBase, err := os.Create(nameDataBase)
     if err != nil {
 		panic(err)
@@ -68,6 +68,11 @@ func handleConn(conn net.Conn){
 			panic(err)
         }
 	}()
+
+	if _, err := dataBase.Write([]byte("Y,M,D,data\n")); err != nil {
+		// Retorna uma mensagem de status negativo em caso de erro
+		panic(err)
+	}
 		
 	stp := true
 	for stp{
