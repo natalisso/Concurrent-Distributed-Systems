@@ -13,7 +13,7 @@ import (
 )
 
 var wg = &sync.WaitGroup{}
-var NUMCLIENTS = 5
+var NUMCLIENTS = 1
 
 type client struct {
     name string
@@ -50,11 +50,9 @@ func getData(user *client) string{
 }
 
 func sendMessage(user *client, msg string){
-
 		//msg := getData(user)
 		_,err := (*user).conn.Write([]byte(msg))
-		checkError(err)
-	
+		checkError(err)	
 }
 
 func receiveMessage(user *client){
@@ -75,11 +73,11 @@ func runClient(clientName string, server string) {
 	user := client{clientName,conn,bufio.NewReader(conn)}
 	//getName(&user)
 
-	// Mandando o nome
+	// Mandando o nome do client para o server e aguarda o retorno
 	sendMessage(&user,"MSG " + user.name + "\n")
 	receiveMessage(&user)
 
-	x := float64(NUMCLIENTS)
+	x := 0.000000
 	for i:=0; i <= 1E4; i++{
 		if i == 1E4{
 			sendMessage(&user,"STOP " + strconv.FormatFloat(x,'f',6,64) +"\n")
@@ -108,10 +106,11 @@ func main(){
 	}
 	
 	// Inicializando as threads dos clients 
-	nome := "nome"
+	nome := "nomeClient"
 	wg.Add(NUMCLIENTS)
 	for i:=0; i < NUMCLIENTS; i++{
 		go runClient(nome,server)
 	}
 	wg.Wait()
 }
+

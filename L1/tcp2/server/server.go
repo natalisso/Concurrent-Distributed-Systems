@@ -1,18 +1,14 @@
 package main
 
 import (
-	"bufio"
-	//"fmt"
-	"log"
 	"net"
-	// "strings"
-	"math/rand"
-	"time"
 	"os"
-	"sync"
+	"bufio"
+	"log"
+	//"fmt"
+	//"strings"
+	"time"
 )
-
-var mutex = &sync.Mutex{}
 
 type client struct {
     name string
@@ -52,9 +48,11 @@ func writeFile(user *client, data string, logMsg string, dataBase *os.File){
 	// Retorna uma mensagem de status possitivo
 	sendMessage(user,logMsg)
 }
+
 func handleConn(conn net.Conn){
-	// log.Printf("Serving %s\n", conn.RemoteAddr().String())
+	// Cria um objeto do tipo client
 	user := client{"",conn,bufio.NewReader(conn)}
+	//log.Printf("Serving %s\n", conn.RemoteAddr().String())
 
 	// Abre arquivo de saida 
 	nameDataBase := "./data_bases/dataBase" + conn.RemoteAddr().String() + ".csv"
@@ -68,11 +66,6 @@ func handleConn(conn net.Conn){
 			panic(err)
         }
 	}()
-
-	if _, err := dataBase.Write([]byte("Y,M,D,data\n")); err != nil {
-		// Retorna uma mensagem de status negativo em caso de erro
-		panic(err)
-	}
 		
 	stp := true
 	for stp{
@@ -114,9 +107,6 @@ func main() {
 
 	// Fecha o socket no final da execução
 	defer l.Close()
-
-	// Lida com a questão da concorrência
-	rand.Seed(time.Now().Unix())
 
 	for {
 		// Aceita conexões e inicia a rotina de tratamento (goroutine)
