@@ -79,7 +79,7 @@ func runClient(clientName string, server string) {
 			sendMessage(&user, "MSG "+strconv.FormatFloat(x, 'f', 6, 64)+"\n")
 			receiveMessage(&user)
 			time2 := time.Now()
-			x = float64(time2.Sub(time1).Nanoseconds()) / 1E6
+			x = float64(time2.Sub(time1).Nanoseconds()) / 1E3
 		}
 	}
 	wg.Done()

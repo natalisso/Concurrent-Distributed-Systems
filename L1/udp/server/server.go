@@ -9,11 +9,10 @@ import (
 	//"math/rand"
 	"os"
 	"strings"
-	"sync"
+	//"sync"
 	"time"
 )
 
-var mutex = &sync.Mutex{}
 var users []client
 
 type client struct {
@@ -42,9 +41,8 @@ func checkError(err error) {
 }
 
 func receiveMessage(conn *net.UDPConn) (string, *net.UDPAddr) {
-	// Recebe o nome do client
+	// Recebe a mensagem do cliente
 	buffer := make([]byte, 1024)
-
 	n, addr, err := conn.ReadFromUDP(buffer)
 	checkError(err)
 	//fmt.Println("receiveMessage: ", string(buffer[:n]))
@@ -70,7 +68,7 @@ func handleConn(conn *net.UDPConn, msg string, addr *net.UDPAddr) {
 	switch commandName {
 	case "MSG":
 
-		// Verficia se ta salvo
+		// Verifica se ta salvo
 		if isNewUser(addr.String(), users) {
 			user = client{msg[i+1:], conn, addr}
 			users = append(users, user)
@@ -89,7 +87,6 @@ func handleConn(conn *net.UDPConn, msg string, addr *net.UDPAddr) {
 
 		data := msg[i+1:]
 		//fmt.Println("dado da mensagem:", data)
-
 		// Escrevo no arquivo o que foi recebido junto com um formato de tempo
 		t := time.Now().UTC()
 		if _, err := dataBase.Write([]byte(t.Format("2006,01,02") + "," + data)); err != nil {
