@@ -9,7 +9,6 @@ import (
 	// "math/rand"
 	// "os"
 	"strings"
-
 	//"sync"
 	"time"
 )
@@ -55,6 +54,27 @@ func handleConn(conn *net.UDPConn, msg string, addr *net.UDPAddr) {
 
 	switch commandName {
 	case "MSG":
+<<<<<<< HEAD
+=======
+
+		// Verifica se ta salvo
+		if isNewUser(addr.String(), users) {
+			user = client{msg[i+1:], conn, addr}
+			users = append(users, user)
+
+			// open output file
+			nameDataBase := "./data_bases/dataBase" + addr.String() + ".csv"
+			var err error
+			dataBase, err = os.Create(nameDataBase)
+			checkError(err)
+
+		} else {
+			var err error
+			dataBase, err = os.OpenFile("./data_bases/dataBase"+addr.String()+".csv", os.O_APPEND|os.O_WRONLY, 0600)
+			checkError(err)
+		}
+
+>>>>>>> 929794730923bd385095e894624c46bb8a6123a5
 		data := msg[i+1:]
 		//fmt.Println("dado da mensagem:", data)
 		// Escrevo no arquivo o que foi recebido junto com um formato de tempo
