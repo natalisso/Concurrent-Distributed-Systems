@@ -2,110 +2,138 @@ package main
 
 import (
 	"net"
-	"os"
-	"fmt"
-	"sync"
 	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+	"strconv"
+	"time"
+	"sync"
 )
 
 var wg = &sync.WaitGroup{}
+var NUMCLIENTS = 1
+
+type client struct {
+    name string
+	conn  net.Conn
+	reader *bufio.Reader
+}
 
 func checkError(err error) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+		log.Printf("Fatal error: %s", err.Error())
 		os.Exit(1)
 	}
 }
 
-func sendMessage(conn net.Conn){
-	for{
-		// Lendo entrada do teclado
-		reader := bufio.NewReader(os.Stdin)
-		menssage, err := reader.ReadString('\n')
-		checkError(err)
-
-		if menssage == "STOP\n"{
-			conn.Write([]byte(string("STOP \n")))
-			bresync.WaitGroup{}ak
-		}
-		// Escrevendo a mensagem na conexão
-		conn.Write([]byte(string("MSG "+menssage+"\n")))
-	}
-	wg.Done()
-}
-
-func receiveMessage(conn net.Conn) {
-	for{
-		// Ouvindo a resposta do servidor
-		menssage, err := bufio.NewReader(conn).ReadString('\n')
-		checkError(err)
-
-		// Escrevendo a resposta do servidor no terminal
-		if menssage == "STOP\n"{
-			fmt.Print("stop client!")
-			break
-		}
-		fmt.Printf(menssage)	
-	}
-	wg.Done()
-}
-
-func getName(conn net.Conn){
+func getName(user *client){
 	fmt.Printf("Type your name: ")
-	reader := bufio.NewReader(os.Stdin)
-	text, err := reader.ReadString('\n')
-	checkError(err)
-
-	conn.Write([]byte(string("NAME "+text+"\n")))
-
-	menssage, err := bufio.NewReader(conn).ReadString('\n')
-	checkError(err)
-	fmt.Printf(menssage)
-}
-
-func startChat(conn net.Conn){
-	fmt.Println("Type 'JOIN' to participate :)")
 
 	reader := bufio.NewReader(os.Stdin)
-	text, err := reader.ReadString('\n')
+	name, err := reader.ReadString('\n')
 	checkError(err)
-	fmt.Print(text)
-	if text == "JOIN\n" {
-		conn.Write([]byte(string("JOIN \n")))
-	}else{
-		fmt.Println("errouuu")
-		conn.Write([]byte(string("ERR \n")))
-	}
+
+	(*user).name = strings.Replace(name, "\n", "", 1)
+
 }
 
-func main() {
+func getData(user *client) string{
+	fmt.Printf("Entry the data: ")
 
-	// Servidor na máquina local na porta 8080 (default)
-	server := "127.0.0.1:8081"
-	// Pego o endereço ip e a porta do servidor caso tenham sido passados como argumento
-	if len(os.Args) == 2 {
-		server = os.Args[1]	
-	}
+	reader := bufio.NewReader(os.Stdin)
+	data, err := reader.ReadString('\n')
+	checkError(err)
 
+	return data
+}
+
+func sendMessage(user *client, msg string){
+		//msg := getData(user)
+		_,err := (*user).conn.Write([]byte(msg))
+		checkError(err)	
+}
+
+func receiveMessage(user *client) string{
+	message, err := (*user).reader.ReadString('\n')
+	checkError(err)
+
+	// Escrevendo a resposta do servidor no terminal
+	//fmt.Printf(message)	
+	return message
+}
+
+func runClient(clientName string, server string) {
 	// Conectando ao servidor
 	conn, err := net.Dial("tcp", server)
 	checkError(err)
+	
+	//fmt.Printf("Connected to server at %s!\n",server)
+	//getName(&user)
 
-	getName(conn)
-	startChat(conn)
+	// Abre arquivo de saida 
+	nameDataBase := "./data_bases/dataBase" + clientName + "(" + strconv.Itoa(NUMCLIENTS) + ")" + ".csv"
+    dataBase, err := os.Create(nameDataBase)
+    if err != nil {
+		panic(err)
+    }
+	user := client{clientName,conn,bufio.NewReader(conn)}
 
-	received, err := bufio.NewReader(conn).ReadString('\n')
-	checkError(err)
-	for received == "Unknown command!\n"{
-		startChat(conn)
-		received, err = bufio.NewReader(conn).ReadString('\n')
-		checkError(err)
+	
+	x := float64(NUMCLIENTS)
+	for i:=0; i < 1E4; i++{
+		if i == 1E4 - 1{
+			time1 := time.Now()
+			sendMessage(&user,"STOP " + strconv.FormatFloat(x,'f',6,64) +"\n")
+			message := receiveMessage(&user)
+			time2 := time.Now()
+			x = float64(time2.Sub(time1).Nanoseconds()) / 1E6
+			if _, err := dataBase.Write([]byte(message)); err != nil {		
+				panic(err)
+			}
+		}else if i == 0{
+			// Mandando o dado inicial para o server e aguarda o retorno
+			time1 := time.Now()
+			sendMessage(&user,"MSG " + "data\n")
+			message := receiveMessage(&user)
+			time2 := time.Now()
+			x = float64(time2.Sub(time1).Nanoseconds()) / 1E6
+			if _, err := dataBase.Write([]byte(message)); err != nil {		
+				panic(err)
+		}
+		}else{
+			time1 := time.Now()
+			sendMessage(&user,"MSG " + strconv.FormatFloat(x,'f',6,64) +"\n")
+			message := receiveMessage(&user)
+			time2 := time.Now()
+			x = float64(time2.Sub(time1).Nanoseconds()) / 1E6
+			if _, err := dataBase.Write([]byte(message)); err != nil {		
+				panic(err)
+			}
+		}
 	}
-
-	wg.Add(1)
-	go sendMessage(conn)
-	wg.Add(1)
-	go receiveMessage(conn)
-	wg.Wait()
-		
+	wg.Done()
 }
+
+func main(){
+	// Servidor na máquina local na porta 4093 (default)
+	server := "127.0.0.1:4093" 
+
+	// Pego o numero de clients e o endereço ip e a porta do servidor caso tenham sido passados como argumento 
+	if len(os.Args) == 2 {
+		NUMCLIENTS,_ = strconv.Atoi(os.Args[1])
+	}else if len(os.Args) == 3{
+		NUMCLIENTS,_ = strconv.Atoi(os.Args[1])
+		server = os.Args[2]	
+	}
+	
+	// Inicializando as threads dos clients 
+	wg.Add(NUMCLIENTS)
+	for i:=0; i < NUMCLIENTS; i++{
+		nome := strconv.Itoa(i+1)
+		go runClient(nome,server)
+	}
+	wg.Wait()
+}
+

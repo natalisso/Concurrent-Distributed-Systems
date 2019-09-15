@@ -6,31 +6,20 @@ import (
 	"net"
 
 	// "strings"
-	//"math/rand"
-	"os"
+	// "math/rand"
+	// "os"
 	"strings"
-	"sync"
+
+	//"sync"
 	"time"
 )
 
-var mutex = &sync.Mutex{}
-var users []client
+// var users []client
 
 type client struct {
 	name string
 	conn net.Conn
 	addr *net.UDPAddr
-}
-
-func isNewUser(id string, users []client) bool {
-
-	// varro o slice de client para ver se o usuário já foi conectado
-	for _, idCur := range users {
-		if idCur.addr.String() == id {
-			return false
-		}
-	}
-	return true
 }
 
 func checkError(err error) {
@@ -42,9 +31,8 @@ func checkError(err error) {
 }
 
 func receiveMessage(conn *net.UDPConn) (string, *net.UDPAddr) {
-	// Recebe o nome do client
+	// Recebe a mensagem do cliente
 	buffer := make([]byte, 1024)
-
 	n, addr, err := conn.ReadFromUDP(buffer)
 	checkError(err)
 	//fmt.Println("receiveMessage: ", string(buffer[:n]))
@@ -60,91 +48,41 @@ func sendMessage(addr *net.UDPAddr, msg string, conn *net.UDPConn) {
 
 func handleConn(conn *net.UDPConn, msg string, addr *net.UDPAddr) {
 
-	var user client
-	var dataBase *os.File
-
+	//var user client
 	i := strings.IndexByte(msg, ' ')
 	commandName := msg[:i]
 	//fmt.Println("Comando separado", commandName)
 
 	switch commandName {
 	case "MSG":
-
-		// Verficia se ta salvo
-		if isNewUser(addr.String(), users) {
-			user = client{msg[i+1:], conn, addr}
-			users = append(users, user)
-
-			// open output file
-			nameDataBase := "./data_bases/dataBase" + addr.String() + ".csv"
-			var err error
-			dataBase, err = os.Create(nameDataBase)
-			checkError(err)
-
-		} else {
-			var err error
-			dataBase, err = os.OpenFile("./data_bases/dataBase"+addr.String()+".csv", os.O_APPEND|os.O_WRONLY, 0600)
-			checkError(err)
-		}
-
 		data := msg[i+1:]
 		//fmt.Println("dado da mensagem:", data)
-
 		// Escrevo no arquivo o que foi recebido junto com um formato de tempo
 		t := time.Now().UTC()
-		if _, err := dataBase.Write([]byte(t.Format("2006,01,02") + "," + data)); err != nil {
-			panic(err)
-		}
+		msgToClient := t.Format("2006,01,02") + "," + data
 
-		// Fecho o arquivo depois de utilizá-lo
-		if err := dataBase.Close(); err != nil {
-			panic(err)
-		}
-
-		logMsg := "Data Stored!\n"
-		sendMessage(addr, logMsg, conn)
+		sendMessage(addr, msgToClient, conn)
 
 	case "STOP":
-
-		// Verficia se ta salvo
-		if isNewUser(addr.String(), users) {
-			user = client{msg[i+1:], conn, addr}
-			users = append(users, user)
-
-			// open output file
-			nameDataBase := "./data_bases/dataBase" + addr.String() + ".csv"
-			var err error
-			dataBase, err = os.Create(nameDataBase)
-			checkError(err)
-		} else {
-			var err error
-			dataBase, err = os.OpenFile("./data_bases/dataBase"+addr.String()+".csv", os.O_APPEND|os.O_WRONLY, 0600)
-			checkError(err)
-		}
 		data := msg[i+1:]
 		//fmt.Println("dado da mensagem:", data)
 
 		// Escrevendo no arquivo
 		t := time.Now().UTC()
-		if _, err := dataBase.Write([]byte(t.Format("2006,01,02") + "," + data)); err != nil {
-			panic(err)
-		}
+		msgToClient := t.Format("2006,01,02") + "," + data
 
-		if err := dataBase.Close(); err != nil {
-			panic(err)
-		}
-		stopSign := "STOP\n"
-		sendMessage(addr, stopSign, conn)
+		sendMessage(addr, msgToClient, conn)
 
 	default:
 		errMsg := "Unknown command!\n"
 		sendMessage(addr, errMsg, conn)
 	}
+
 	return
 }
 
 func main() {
-	// Inicializa o servidor na porta 8080 e protocolo UDP
+	// Inicializa o servidor na porta 4093 e protocolo UDP
 	//fmt.Println("Server waiting for connections...")
 	port := ":8080"
 

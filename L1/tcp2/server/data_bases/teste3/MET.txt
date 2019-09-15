@@ -1,1 +1,0 @@
-Teste realizado com o server inicializado de novo para cada aumento do num de clients e sem prints

@@ -46,15 +46,16 @@ func sendMessage(user *client, msg string) {
 	checkError(err)
 }
 
-func receiveMessage(user *client) {
+func receiveMessage(user *client) string {
 	msgFromServer := make([]byte, 1024)
 	(*user).conn.ReadFromUDP(msgFromServer)
 
+	return string(msgFromServer)
 	// Escrevendo a resposta do servidor no terminal
 	//fmt.Printf(string(msgFromServer))
 }
 
-func runClient(clientName string, server string) {
+func runClient(clientName string, server string, i int) {
 	RemoteAddr, err := net.ResolveUDPAddr("udp", server)
 	checkError(err)
 
@@ -65,28 +66,53 @@ func runClient(clientName string, server string) {
 
 	user := client{clientName, conn, bufio.NewReader(conn)}
 
-	// Mandando o nome
-	sendMessage(&user, "MSG "+user.name+"\n")
-	receiveMessage(&user)
+	// open output file
+	nameDataBase := "./data_bases/dataBase" + clientName + "(" + strconv.Itoa(NUMCLIENTS) + ")"+ ".csv"
+	dataBase, err := os.Create(nameDataBase)
+	checkError(err)
 
+	
 	x := float64(NUMCLIENTS)
-	for i := 0; i <= 1E4; i++ {
-		if i == 1E4 {
+	for i := 0; i < 1E4; i++ {
+		if i == 1E4 -1 {
+			time1 := time.Now()
 			sendMessage(&user, "STOP "+strconv.FormatFloat(x, 'f', 6, 64)+"\n")
-			receiveMessage(&user)
+			msgFromServer := receiveMessage(&user)
+			// fmt.Println(msgFromServer)
+			time2 := time.Now()
+			x = float64(time2.Sub(time1).Nanoseconds()) / 1E6
+			if _, err := dataBase.Write([]byte(msgFromServer)); err != nil {
+				panic(err)
+			}
+
+		}else if i == 0{
+			time1 := time.Now()
+			sendMessage(&user, "MSG "+"data\n")
+			msgFromServer := receiveMessage(&user)
+			// fmt.Println(msgFromServer)
+			time2 := time.Now()
+			x = float64(time2.Sub(time1).Nanoseconds()) / 1E6
+
+			if _, err := dataBase.Write([]byte(msgFromServer)); err != nil {
+				panic(err)
+			}
 		} else {
 			time1 := time.Now()
 			sendMessage(&user, "MSG "+strconv.FormatFloat(x, 'f', 6, 64)+"\n")
-			receiveMessage(&user)
+			msgFromServer := receiveMessage(&user)
 			time2 := time.Now()
 			x = float64(time2.Sub(time1).Nanoseconds()) / 1E6
+
+			if _, err := dataBase.Write([]byte(msgFromServer)); err != nil {
+				panic(err)
+			}
 		}
 	}
 	wg.Done()
 }
 
 func main() {
-	// Servidor na máquina local na porta 8080 (default)
+	// Servidor na máquina local na porta 4093 (default)
 	server := "localhost:8080"
 
 	// Pego o numero de clients e o endereço ip e a porta do servidor caso tenham sido passados como argumento
@@ -98,10 +124,10 @@ func main() {
 	}
 
 	/// Inicializando as threads dos clients
-	nome := "nome"
 	wg.Add(NUMCLIENTS)
 	for i := 0; i < NUMCLIENTS; i++ {
-		go runClient(nome, server)
+		nome := strconv.Itoa(i+1)
+		go runClient(nome, server, i)
 	}
 	wg.Wait()
 }

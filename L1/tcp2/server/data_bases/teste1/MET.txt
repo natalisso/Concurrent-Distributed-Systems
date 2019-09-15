@@ -1,1 +1,0 @@
-Teste realizado com o server inicializado uma única vez e com 1 print ao receber uma conexão nova
