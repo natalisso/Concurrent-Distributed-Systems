@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 )
 
-const SAMPLE_SIZE = 1000
+const SAMPLE_SIZE = 10000
+const NUM_CLIENTS = "1"
 
 type Request struct {
 	Header string
@@ -45,11 +47,8 @@ func main() {
 		false, false, nil, )
 	checkError(err,"Falha ao registrar o consumidor servidor de mensageria")
 
-	//start := time.Now()
+
 	for i := 0; i < SAMPLE_SIZE; i++{
-
-		//t1 := time.Now()
-
 		// prepara request
 		msgRequest := Request{Header:"Request",RequestNumber:i}
 		msgRequestBytes,err := json.Marshal(msgRequest)
@@ -64,10 +63,7 @@ func main() {
 		msgRet := <- msgsFromServer
 
 		fmt.Println(string(msgRet.Body))
-		//t2 := time.Now()
-		//x := float64(t2.Sub(t1).Nanoseconds()) / 1000000
-		//fmt.Println(x)
+
+		time.Sleep(10 * time.Millisecond)
 	}
-	//elapsed := time.Since(start)
-	//fmt.Printf("Tempo: %s \n", elapsed)
 }

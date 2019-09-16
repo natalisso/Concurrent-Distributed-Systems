@@ -59,7 +59,7 @@ func main() {
 		fmt.Println(msgRequest)
 
 		// Processa request
-		r := "Here is your answer for the " + strconv.Itoa(msgRequest.RequestNumber) + " request!"
+		r := "Here is your answer for the request " + strconv.Itoa(msgRequest.RequestNumber) + "!"
 
 		// Prepara resposta
 		replyMsg := r
