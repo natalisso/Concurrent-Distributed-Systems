@@ -16,20 +16,20 @@ type Request struct {
 	RequestNumber int
 }
 
-func checkError(err error, msg string) {
-	if err != nil {
-		log.Fatalf("FATAL ERROR -> %s: %s", msg, err)
-	}
-}
-
 func (t *RequestBank) ReceiveMessage(req *Request, reply *string) (error) {
 	*reply = "Here is your answer for the request " + strconv.Itoa(req.RequestNumber) + "!"
 
 	return nil
 }
 
-func main() {
+func checkError(err error, msg string) {
+	if err != nil {
+		log.Fatalf("FATAL ERROR -> %s: %s", msg, err)
+	}
+}
 
+
+func main() {
 	// cria instância do banco
 	bank := new(RequestBank)
 	
@@ -39,10 +39,9 @@ func main() {
 
 	// Cria um listen rpc-sender
 	l, err := net.Listen("tcp", ":"+strconv.Itoa(SERVER_PORT))
-	checkError(err, "Can't create the server")
+	checkError(err, "Couldn't create the server")
 
 	// Aguarda por chamadas
-	log.Println("Server is already (RPC TCP) ...")
+	log.Println("Server is ready (RPC TCP) ...")
 	server.Accept(l)
-
 }

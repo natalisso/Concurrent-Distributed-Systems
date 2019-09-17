@@ -5,6 +5,8 @@ import (
 	"time"
 	"log"
 	"strconv"
+	"fmt"
+	"os"
 )
 
 const SAMPLE_SIZE = 10000
@@ -33,8 +35,21 @@ func main() {
 
 	defer client.Close()
 
+	// Abre arquivo de saida 
+	nameDataBase :="../../Analise_comparativa/MOO/dataBase"+NUM_CLIENTS+".csv"
+	fmt.Println("ARQ = ",nameDataBase)
+	
+	dataBase, err := os.Create(nameDataBase)
+    if err != nil {
+		panic(err)
+	}
+	if _, err := dataBase.Write([]byte("data\n")); err != nil {		
+		panic(err)
+	}
+
 	// Invoca request
 	for i := 0; i < SAMPLE_SIZE; i++ {
+		t1 := time.Now()
 
 		// Prepara request
 		msgRequest := Request{Header:"Request", RequestNumber: i}
@@ -44,6 +59,11 @@ func main() {
 		checkError(err, "Error communicating with server")
 
 		//log.Println(reply)
+		t2 := time.Now()
+		deltaTime := float64(t2.Sub(t1).Nanoseconds()) / 1E6
+		if _, err := dataBase.Write([]byte(strconv.FormatFloat(deltaTime,'f',6,64)+"\n")); err != nil {		
+			panic(err)
+		}
 		time.Sleep(10 * time.Millisecond)
 	}
 }
