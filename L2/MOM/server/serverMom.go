@@ -4,7 +4,7 @@ import (
 	"github.com/streadway/amqp"
 	"encoding/json"
 	"strconv"
-	"fmt"
+	// "fmt"
 	"log"
 )
 
@@ -49,14 +49,14 @@ func main() {
 		false, false, nil, )
 	checkError(err,"Falha ao registrar o consumidor do servidor de mensageria")
 
-	fmt.Println("Servidor pronto...")
+	log.Println("Servidor pronto...")
 	for d := range msgsFromClient {
 		// Recebe request
 		msgRequest := Request{}
 		err := json.Unmarshal(d.Body, &msgRequest)
 		checkError(err,"Falha ao desserializar a mensagem")
 
-		fmt.Println(msgRequest)
+		// fmt.Println(msgRequest)
 
 		// Processa request
 		r := "Here is your answer for the request " + strconv.Itoa(msgRequest.RequestNumber) + "!"

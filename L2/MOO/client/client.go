@@ -4,10 +4,11 @@ import (
 	"net/rpc"
 	"time"
 	"log"
+	"fmt"
 	"strconv"
 )
 
-const SAMPLE_SIZE = 10000
+const SAMPLE_SIZE = 10
 const NUM_CLIENTS = "1"
 const SERVER_PORT = 1313
 
@@ -43,7 +44,7 @@ func main() {
 		err := client.Call("Bank.ReceiveMessage", msgRequest, &reply)
 		checkError(err, "Error communicating with server")
 
-		//log.Println(reply)
+		fmt.Println(reply)
 		time.Sleep(10 * time.Millisecond)
 	}
 }

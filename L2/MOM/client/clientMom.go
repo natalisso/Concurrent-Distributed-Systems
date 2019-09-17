@@ -3,13 +3,12 @@ package main
 import (
 	"github.com/streadway/amqp"
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"log"
 	"time"
 )
 
-const SAMPLE_SIZE = 10000
-const NUM_CLIENTS = "1"
+const SAMPLE_SIZE = 10002
 
 type Request struct {
 	Header string
@@ -60,9 +59,10 @@ func main() {
 		checkError(err,"Falha ao enviar a mensagem para o servidor de mensageria")
 
 		// recebe resposta
-		msgRet := <- msgsFromServer
+		// msgRet <- msgsFromServer
+		<-msgsFromServer
 
-		fmt.Println(string(msgRet.Body))
+		// fmt.Println(string(msgRet.Body))
 
 		time.Sleep(10 * time.Millisecond)
 	}

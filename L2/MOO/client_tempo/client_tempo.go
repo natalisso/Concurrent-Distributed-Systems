@@ -4,13 +4,13 @@ import (
 	"net/rpc"
 	"time"
 	"log"
+	// "fmt"
 	"strconv"
-	"fmt"
 	"os"
 )
 
-const SAMPLE_SIZE = 10000
-const NUM_CLIENTS = "1"
+const SAMPLE_SIZE = 10002
+const NUM_CLIENTS = "5"
 const SERVER_PORT = 1313
 
 
@@ -37,7 +37,7 @@ func main() {
 
 	// Abre arquivo de saida 
 	nameDataBase :="../../Analise_comparativa/MOO/dataBase"+NUM_CLIENTS+".csv"
-	fmt.Println("ARQ = ",nameDataBase)
+	//fmt.Println("ARQ = ",nameDataBase)
 	
 	dataBase, err := os.Create(nameDataBase)
     if err != nil {
@@ -58,7 +58,7 @@ func main() {
 		err := client.Call("Bank.ReceiveMessage", msgRequest, &reply)
 		checkError(err, "Error communicating with server")
 
-		//log.Println(reply)
+		// fmt.Println(reply)
 		t2 := time.Now()
 		deltaTime := float64(t2.Sub(t1).Nanoseconds()) / 1E6
 		if _, err := dataBase.Write([]byte(strconv.FormatFloat(deltaTime,'f',6,64)+"\n")); err != nil {		

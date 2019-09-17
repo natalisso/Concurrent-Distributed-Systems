@@ -3,15 +3,15 @@ package main
 import (
 	"github.com/streadway/amqp"
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"log"
 	"time"
 	"strconv"
 	"os"
 )
 
-const SAMPLE_SIZE = 10000
-const NUM_CLIENTS = "1"
+const SAMPLE_SIZE = 10002
+const NUM_CLIENTS = "5"
 
 type Request struct {
 	Header string
@@ -52,7 +52,7 @@ func main() {
 
 	// Abre arquivo de saida 
 	nameDataBase :="../../Analise_comparativa/MOM/dataBase"+NUM_CLIENTS+".csv"
-	fmt.Println("ARQ = ",nameDataBase)
+	// fmt.Println("ARQ = ",nameDataBase)
 	
 	dataBase, err := os.Create(nameDataBase)
     if err != nil {
@@ -76,9 +76,10 @@ func main() {
 		checkError(err,"Falha ao enviar a mensagem para o servidor de mensageria")
 
 		// recebe resposta
-		msgRet := <- msgsFromServer
+		// msgRet <- msgsFromServer
+		<-msgsFromServer
 
-		fmt.Println(string(msgRet.Body))
+		// fmt.Println(string(msgRet.Body))
 		t2 := time.Now()
 		deltaTime := float64(t2.Sub(t1).Nanoseconds()) / 1E6
 		if _, err := dataBase.Write([]byte(strconv.FormatFloat(deltaTime,'f',6,64)+"\n")); err != nil {		
