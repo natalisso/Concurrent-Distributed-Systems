@@ -1,87 +1,54 @@
 package proxies
 
 import (
+	"Middleware/Distribution/requestor"
+	"Middleware/aux"
 	"reflect"
 	"shared"
-	"Middleware/aux"
-	"Middleware/Distribution/requestor"
 )
 
-
-type CalculatorProxy struct {
+type DataBankProxy struct {
 	Proxy ClientProxy
 }
 
-func NewCalculatorProxy() CalculatorProxy {
-	p := new(CalculatorProxy)
+func NewDataBankProxy() DataBankProxy {
+	p := new(DataBankProxy)
 
-	p.Proxy.TypeName = reflect.TypeOf(CalculatorProxy{}).String()
+	p.Proxy.TypeName = reflect.TypeOf(DataBankProxy{}).String()
 	p.Proxy.Host = "localhost"
 	//p.Proxy.Port = shared.FindNextAvailablePort()  // TODO
 	p.Proxy.Port = shared.CALCULATOR_PORT
 	return *p
 }
 
-func (proxy CalculatorProxy) Add(p1 int, p2 int) int {
+func (proxy DataBankProxy) Save(p1 string, p2 int, p3 string) string {
 
 	// prepare invocation
-	params := make([]interface{},2)
+	params := make([]interface{}, 3)
 	params[0] = p1
 	params[1] = p2
-	request := aux.Request{Op:"Add",Params:params}
-	inv := aux.Invocation{Host:proxy.Proxy.Host,Port:proxy.Proxy.Port,Request:request}
+	params[2] = p3
+	request := aux.Request{Op: "Save", Params: params}
+	inv := aux.Invocation{Host: proxy.Proxy.Host, Port: proxy.Proxy.Port, Request: request}
 
 	// invoke requestor
 	req := requestor.Requestor{}
-	ter := req.Invoke(inv).([]interface{})
+	result := req.Invoke(inv).([]interface{})
 
-	return int(ter[0].(float64))
+	return string(result[0].(string))
 }
 
-func (proxy CalculatorProxy) Sub(p1 int, p2 int) int {
+func (proxy DataBankProxy) Search(p1 string) bool {
 
 	// prepare invocation
-	params := make([]interface{},2)
+	params := make([]interface{}, 1)
 	params[0] = p1
-	params[1] = p2
-	request := aux.Request{Op:"Sub",Params:params}
-	inv := aux.Invocation{Host:proxy.Proxy.Host,Port:proxy.Proxy.Port,Request:request}
+	request := aux.Request{Op: "Search", Params: params}
+	inv := aux.Invocation{Host: proxy.Proxy.Host, Port: proxy.Proxy.Port, Request: request}
 
 	// invoke requestor
 	req := requestor.Requestor{}
-	ter := req.Invoke(inv).([]interface{})
+	result := req.Invoke(inv).([]interface{})
 
-	return int(ter[0].(float64))
-}
-
-func (proxy CalculatorProxy) Mul(p1 int, p2 int) int {
-
-	// prepare invocation
-	params := make([]interface{},2)
-	params[0] = p1
-	params[1] = p2
-	request := aux.Request{Op:"Mul",Params:params}
-	inv := aux.Invocation{Host:proxy.Proxy.Host,Port:proxy.Proxy.Port,Request:request}
-
-	// invoke requestor
-	req := requestor.Requestor{}
-	ter := req.Invoke(inv).([]interface{})
-
-	return int(ter[0].(float64))
-}
-
-func (proxy CalculatorProxy) Div(p1 int, p2 int) int {
-
-	// prepare invocation
-	params := make([]interface{},2)
-	params[0] = p1
-	params[1] = p2
-	request := aux.Request{Op:"Div",Params:params}
-	inv := aux.Invocation{Host:proxy.Proxy.Host,Port:proxy.Proxy.Port,Request:request}
-
-	// invoke requestor
-	req := requestor.Requestor{}
-	ter := req.Invoke(inv).([]interface{})
-
-	return int(ter[0].(float64))
+	return bool(result[0].(float64))
 }

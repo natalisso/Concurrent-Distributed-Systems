@@ -6,4 +6,3 @@ type ClientProxy struct {
 	Id       int
 	TypeName string
 }
-

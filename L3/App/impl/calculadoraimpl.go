@@ -2,40 +2,50 @@ package impl
 
 import "shared"
 
-type Calculadora struct{}
+type user struct {
+	name     string
+	identity string
+	age      int
+}
 
-func (Calculadora) InvocaCalculadora(req shared.Request) int {
-	var r int
+type DataBank struct {
+	users []user
+}
+
+func (bank *DataBank) InvocaCalculadora(req shared.Request) []interface{} {
+	var saved string
+	var wasFound bool
+	var userFounded user
 
 	op := req.Op
 	p1 := req.P1
 	p2 := req.P2
+	p3 := req.p3
 
 	switch op {
-	case "add":
-		r = Calculadora{}.Add(p1, p2)
-	case "sub":
-		r = Calculadora{}.Sub(p1, p2)
-	case "mul":
-		r = Calculadora{}.Mul(p1, p2)
-	case "div":
-		r = Calculadora{}.Div(p1, p2)
+	case "save":
+		saved = bank.Save(p1, p2, p3)
+	case "search":
+		r = bank.Search(p2)
 	}
 	return r
 }
 
-func (Calculadora) Add(x int, y int) int {
-	return x + y
+func (bank *DataBank) Save(name string, identity string, age int) string {
+	newUser := user{name: name, identity: identity, age: age}
+	append(bank.users, newUser)
+
+	return "User saved successfully"
 }
 
-func (Calculadora) Sub(x int, y int) int {
-	return x - y
-}
+func (bank *DataBank) Search(ind string) bool {
 
-func (Calculadora) Mul(x int, y int) int {
-	return x * y
-}
-
-func (Calculadora) Div(x int, y int) int {
-	return x / y
+	found := false
+	for i := 0; i < len(bank.users); i++ {
+		if bank.users[i].identity == ind {
+			found = true
+		}
+	}
+	
+	return found
 }
