@@ -3,9 +3,9 @@ package main
 import (
 	"github.com/streadway/amqp"
 	"encoding/json"
-	// "fmt"
-	"log"
+	"fmt"
 	"time"
+	"log"
 )
 
 const SAMPLE_SIZE = 10002
@@ -59,10 +59,10 @@ func main() {
 		checkError(err,"Falha ao enviar a mensagem para o servidor de mensageria")
 
 		// recebe resposta
-		// msgRet <- msgsFromServer
-		<-msgsFromServer
+		msgRet := <- msgsFromServer
+		// <-msgsFromServer
 
-		// fmt.Println(string(msgRet.Body))
+		fmt.Println(string(msgRet.Body))
 
 		time.Sleep(10 * time.Millisecond)
 	}

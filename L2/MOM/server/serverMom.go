@@ -8,6 +8,13 @@ import (
 	"log"
 )
 
+/*IMPORTANTE:
+	Necessário inicializar o servidor de mensageria antes:
+		sudo service rabbitmq-server start
+	Pra parar:
+		sudo service rabbitmq-server stop
+*/
+
 type Request struct {
 	Header string
 	RequestNumber int
@@ -20,11 +27,6 @@ func checkError(err error, msg string) {
 }
 
 func main() {
-	// Necessário inicializar o servidor de mensageria antes:
-	// sudo service rabbitmq-server start
-	// Pra parar:
-	// sudo service rabbitmq-server stop
-
 	// Conecta ao servidor de mensageria
 	connection, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	checkError(err,"Não foi possível se conectar ao servidor de mensageria")
@@ -56,8 +58,6 @@ func main() {
 		err := json.Unmarshal(d.Body, &msgRequest)
 		checkError(err,"Falha ao desserializar a mensagem")
 
-		// fmt.Println(msgRequest)
-
 		// Processa request
 		r := "Here is your answer for the request " + strconv.Itoa(msgRequest.RequestNumber) + "!"
 
@@ -75,3 +75,9 @@ func main() {
 		checkError(err,"Falha ao enviar a mensagem para o servidor de mensageria")
 	}
 }
+
+
+
+
+
+	

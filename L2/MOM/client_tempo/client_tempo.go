@@ -10,8 +10,8 @@ import (
 	"os"
 )
 
-const SAMPLE_SIZE = 10002
-const NUM_CLIENTS = "5"
+const SAMPLE_SIZE = 10000
+const NUM_CLIENTS = "1"
 
 type Request struct {
 	Header string
@@ -58,6 +58,9 @@ func main() {
     if err != nil {
 		panic(err)
 	}
+
+	defer dataBase.Close()
+	
 	if _, err := dataBase.Write([]byte("data\n")); err != nil {		
 		panic(err)
 	}

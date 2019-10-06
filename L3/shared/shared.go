@@ -1,0 +1,54 @@
+package shared
+
+import (
+	"log"
+	"strconv"
+	"net"
+)
+
+const SAMPLE_SIZE = 1000
+const CALCULATOR_PORT = 1313
+const NAMING_PORT = 1414
+const MIOP_REQUEST = 1
+const MIOP_REPLY = 2
+
+type Request struct {
+	Op string
+	P1 int
+	P2 int
+}
+
+type Reply struct {
+	Result []interface{};
+}
+
+type Args struct {
+	A, B int
+}
+
+type Quotient struct {
+	Quo, Rem int
+}
+
+func ChecaErro(err error, msg string) {
+	if err != nil {
+		log.Fatalf("%s!!: %s", msg, err)
+	}
+	//fmt.Println(msg)
+}
+
+func FindNextAvailablePort() int { // TCP only
+	i := 3000
+
+	for i = 3000; i < 4000; i++ {
+		port := strconv.Itoa(i)
+		ln, err := net.Listen("tcp", ":"+port)
+
+		if err == nil {
+			ln.Close()
+			break
+		}
+	}
+	return i
+}
+
