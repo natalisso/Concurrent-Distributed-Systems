@@ -13,7 +13,7 @@ type DataBase struct {
 	users []user
 }
 
-func (bank *DataBase) InvocaCalculadora(req shared.Request) bool {
+func (bank *DataBase) InvokeDataBase(req shared.Request) bool {
 	var r bool
 
 	op := req.Op
@@ -30,8 +30,8 @@ func (bank *DataBase) InvocaCalculadora(req shared.Request) bool {
 	return r
 }
 
-func (bank *DataBase) Save(name string, identity string, age int) bool {
-	newUser := user{name: name, identity: identity, age: age}
+func (bank *DataBase) Save(name string, identity string, year int) bool {
+	newUser := user{name: name, identity: identity, year: year}
 	bank.users = append(bank.users, newUser)
 
 	return true
