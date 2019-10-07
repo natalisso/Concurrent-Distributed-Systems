@@ -17,7 +17,7 @@ func ExecuteExperiment() {
 	// invoke remote operation
 	for i := 0; i < 5; i++ {
 		// t1 := time.Now()
-		fmt.Println(calculator.Add(1, 2))
+		fmt.Println(calculator.Save("Nome", "12312312312", 29))
 		// calculator.Add(1,2)
 		// fmt.Println(time.Now().Sub(t1))
 	}

@@ -5,7 +5,10 @@ import (
 	"Middleware/aux"
 	"reflect"
 	"shared"
+	"math/rand"
 )
+
+const N_OBJECTS = 10
 
 type DataBankProxy struct {
 	Proxy ClientProxy
@@ -18,6 +21,7 @@ func NewDataBankProxy() DataBankProxy {
 	p.Proxy.Host = "localhost"
 	//p.Proxy.Port = shared.FindNextAvailablePort()  // TODO
 	p.Proxy.Port = shared.CALCULATOR_PORT
+	p.Proxy.id = rand.intn(N_OBJECTS)
 	return *p
 }
 
@@ -29,7 +33,7 @@ func (proxy DataBankProxy) Save(p1 string, p2 int, p3 string) string {
 	params[1] = p2
 	params[2] = p3
 	request := aux.Request{Op: "Save", Params: params}
-	inv := aux.Invocation{Host: proxy.Proxy.Host, Port: proxy.Proxy.Port, Request: request}
+	inv := aux.Invocation{Host: proxy.Proxy.Host, Port: proxy.Proxy.Port, Request: request, id: proxy.Proxy.Id}
 
 	// invoke requestor
 	req := requestor.Requestor{}

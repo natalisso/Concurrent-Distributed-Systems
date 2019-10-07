@@ -11,6 +11,8 @@ import (
 
 type NamingInvoker struct {}
 
+// ESSE É DO SERVIÇO DE NOME
+
 func (NamingInvoker) Invoke(){
 	srhImpl := srh.SRH{ServerHost:"localhost",ServerPort:shared.NAMING_PORT}
 	marshallerImpl := marshaller.Marshaller{}

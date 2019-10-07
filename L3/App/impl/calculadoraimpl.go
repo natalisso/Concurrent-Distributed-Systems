@@ -9,6 +9,7 @@ type user struct {
 }
 
 type DataBank struct {
+	id    int
 	users []user
 }
 
@@ -46,6 +47,6 @@ func (bank *DataBank) Search(ind string) bool {
 			found = true
 		}
 	}
-	
+
 	return found
 }
