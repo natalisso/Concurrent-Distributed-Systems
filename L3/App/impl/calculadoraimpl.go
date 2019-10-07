@@ -5,41 +5,39 @@ import "shared"
 type user struct {
 	name     string
 	identity string
-	age      int
+	year     int
 }
 
-type DataBank struct {
-	id    int
+type DataBase struct {
+	Id    int
 	users []user
 }
 
-func (bank *DataBank) InvocaCalculadora(req shared.Request) []interface{} {
-	var saved string
-	var wasFound bool
-	var userFounded user
+func (bank *DataBase) InvocaCalculadora(req shared.Request) bool {
+	var r bool
 
 	op := req.Op
 	p1 := req.P1
 	p2 := req.P2
-	p3 := req.p3
+	p3 := req.P3
 
 	switch op {
 	case "save":
-		saved = bank.Save(p1, p2, p3)
+		r = bank.Save(p1, p2, p3)
 	case "search":
 		r = bank.Search(p2)
 	}
 	return r
 }
 
-func (bank *DataBank) Save(name string, identity string, age int) string {
+func (bank *DataBase) Save(name string, identity string, age int) bool {
 	newUser := user{name: name, identity: identity, age: age}
-	append(bank.users, newUser)
+	bank.users = append(bank.users, newUser)
 
-	return "User saved successfully"
+	return true
 }
 
-func (bank *DataBank) Search(ind string) bool {
+func (bank *DataBase) Search(ind string) bool {
 
 	found := false
 	for i := 0; i < len(bank.users); i++ {

@@ -1,22 +1,21 @@
 package repository
 
 import (
-	"reflect"
 	"Middleware/Distribution/proxies"
+	"reflect"
 )
 
-func CheckRepository(proxy proxies.ClientProxy) interface{}{
+func CheckRepository(proxy proxies.ClientProxy) interface{} {
 	var clientProxy interface{}
 
-	switch proxy.TypeName{
-	case reflect.TypeOf(proxies.CalculatorProxy{}).String():
-		calculatorProxy := proxies.NewCalculatorProxy()
-		calculatorProxy.Proxy.TypeName = proxy.TypeName
-		calculatorProxy.Proxy.Host = proxy.Host
-		calculatorProxy.Proxy.Port = proxy.Port
-		clientProxy = calculatorProxy
+	switch proxy.TypeName {
+	case reflect.TypeOf(proxies.DataBaseProxy{}).String():
+		dataBaseProxy := proxies.NewDataBaseProxy()
+		dataBaseProxy.Proxy.TypeName = proxy.TypeName
+		dataBaseProxy.Proxy.Host = proxy.Host
+		dataBaseProxy.Proxy.Port = proxy.Port
+		clientProxy = dataBaseProxy
 	}
 
 	return clientProxy
 }
-

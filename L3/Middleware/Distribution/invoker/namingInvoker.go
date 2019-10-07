@@ -1,24 +1,23 @@
 package invoker
 
 import (
-	"shared"
-	"Middleware/Infrastructure/srh"
 	"Middleware/Distribution/marshaller"
 	"Middleware/Distribution/miop"
 	"Middleware/Distribution/proxies"
+	"Middleware/Infrastructure/srh"
 	"Middleware/Services/naming"
+	"shared"
 )
 
-type NamingInvoker struct {}
+type NamingInvoker struct{}
 
-// ESSE É DO SERVIÇO DE NOME
 
-func (NamingInvoker) Invoke(){
-	srhImpl := srh.SRH{ServerHost:"localhost",ServerPort:shared.NAMING_PORT}
+func (NamingInvoker) Invoke() {
+	srhImpl := srh.SRH{ServerHost: "localhost", ServerPort: shared.NAMING_PORT}
 	marshallerImpl := marshaller.Marshaller{}
 	namingImpl := naming.NamingService{}
 	miopPacketReply := miop.Packet{}
-	replyParams := make([]interface{},1)
+	replyParams := make([]interface{}, 1)
 
 	// control loop
 	for {
@@ -33,14 +32,14 @@ func (NamingInvoker) Invoke(){
 
 		// demux request
 		switch operation {
-		case "Register" :
+		case "Register":
 			_p1 := miopPacketRequest.Bd.ReqBody.Body[0].(string)
 			_map := miopPacketRequest.Bd.ReqBody.Body[1].(map[string]interface{})
 			_proxyTemp := _map["Proxy"].(map[string]interface{})
-			_p2 := proxies.ClientProxy{TypeName:_proxyTemp["TypeName"].(string),Host:_proxyTemp["Host"].(string),Port:int(_proxyTemp["Port"].(float64)),Id:int(_proxyTemp["Id"].(float64))}
+			_p2 := proxies.ClientProxy{TypeName: _proxyTemp["TypeName"].(string), Host: _proxyTemp["Host"].(string), Port: int(_proxyTemp["Port"].(float64)), Id: int(_proxyTemp["Id"].(float64))}
 
 			// dispatch request
-			replyParams[0] = namingImpl.Register(_p1,_p2)
+			replyParams[0] = namingImpl.Register(_p1, _p2)
 		case "Lookup":
 			_p1 := miopPacketRequest.Bd.ReqBody.Body[0].(string)
 
@@ -49,11 +48,11 @@ func (NamingInvoker) Invoke(){
 		}
 
 		// assembly reply packet
-		repHeader := miop.ReplyHeader{Context:"", RequestId: miopPacketRequest.Bd.ReqHeader.RequestId,Status:1}
-		repBody := miop.ReplyBody{OperationResult:replyParams}
-		header := miop.Header{Magic:"MIOP",Version:"1.0",ByteOrder:true,MessageType:shared.MIOP_REQUEST}
-		body := miop.Body{RepHeader:repHeader,RepBody:repBody}
-		miopPacketReply = miop.Packet{Hdr:header,Bd:body}
+		repHeader := miop.ReplyHeader{Context: "", RequestId: miopPacketRequest.Bd.ReqHeader.RequestId, Status: 1}
+		repBody := miop.ReplyBody{OperationResult: replyParams}
+		header := miop.Header{Magic: "MIOP", Version: "1.0", ByteOrder: true, MessageType: shared.MIOP_REQUEST}
+		body := miop.Body{RepHeader: repHeader, RepBody: repBody}
+		miopPacketReply = miop.Packet{Hdr: header, Bd: body}
 
 		// marshall reply packet
 		msgToClientBytes := marshallerImpl.Marshall(miopPacketReply)
@@ -62,4 +61,3 @@ func (NamingInvoker) Invoke(){
 		srhImpl.Send(msgToClientBytes)
 	}
 }
-

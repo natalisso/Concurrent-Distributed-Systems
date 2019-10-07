@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"Middleware/Distribution/invoker"
 	"Middleware/Distribution/proxies"
 	"Middleware/Services/naming/proxy"
-	"Middleware/Distribution/invoker"
+	"fmt"
 )
 
 func main() {
@@ -13,16 +13,16 @@ func main() {
 	namingProxy := proxy.NamingProxy{}
 
 	// create a proxy of calculator service
-	calculator := proxies.NewCalculatorProxy()
+	dataBase := proxies.NewDataBaseProxy()
 	//converter := proxies.NewConverterProxy()
 
 	// register service in the naming service
-	namingProxy.Register("Calculator", calculator)
+	namingProxy.Register("DataBase", dataBase)
 	//namingProxy.Register("Converter", converter)
 
 	// control loop passed to middleware
 	fmt.Println("Calculator Server running!!")
-	calculatorInvoker := invoker.NewCalculatorInvoker()
+	calculatorInvoker := invoker.NewDataBaseInvoker()
 	//converterInvoker := invoker.NewConverter()
 
 	go calculatorInvoker.Invoke()
@@ -30,4 +30,3 @@ func main() {
 
 	fmt.Scanln()
 }
-

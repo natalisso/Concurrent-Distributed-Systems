@@ -3,29 +3,28 @@ package proxies
 import (
 	"Middleware/Distribution/requestor"
 	"Middleware/aux"
+	"fmt"
+	"math/rand"
 	"reflect"
 	"shared"
-	"math/rand"
 )
 
-const N_OBJECTS = 10
-
-type DataBankProxy struct {
+type DataBaseProxy struct {
 	Proxy ClientProxy
 }
 
-func NewDataBankProxy() DataBankProxy {
-	p := new(DataBankProxy)
+func NewDataBaseProxy() DataBaseProxy {
+	p := new(DataBaseProxy)
 
-	p.Proxy.TypeName = reflect.TypeOf(DataBankProxy{}).String()
+	p.Proxy.TypeName = reflect.TypeOf(DataBaseProxy{}).String()
 	p.Proxy.Host = "localhost"
 	//p.Proxy.Port = shared.FindNextAvailablePort()  // TODO
 	p.Proxy.Port = shared.CALCULATOR_PORT
-	p.Proxy.id = rand.intn(N_OBJECTS)
+	p.Proxy.Id = rand.Intn(shared.N_INSTANCES)
 	return *p
 }
 
-func (proxy DataBankProxy) Save(p1 string, p2 int, p3 string) string {
+func (proxy DataBaseProxy) Save(p1 string, p2 string, p3 int) bool {
 
 	// prepare invocation
 	params := make([]interface{}, 3)
@@ -33,16 +32,17 @@ func (proxy DataBankProxy) Save(p1 string, p2 int, p3 string) string {
 	params[1] = p2
 	params[2] = p3
 	request := aux.Request{Op: "Save", Params: params}
-	inv := aux.Invocation{Host: proxy.Proxy.Host, Port: proxy.Proxy.Port, Request: request, id: proxy.Proxy.Id}
+	inv := aux.Invocation{Host: proxy.Proxy.Host, Port: proxy.Proxy.Port, Request: request, Id: proxy.Proxy.Id}
 
 	// invoke requestor
 	req := requestor.Requestor{}
+	fmt.Println("Vou pro invoke")
 	result := req.Invoke(inv).([]interface{})
 
-	return string(result[0].(string))
+	return result[0].(bool)
 }
 
-func (proxy DataBankProxy) Search(p1 string) bool {
+func (proxy DataBaseProxy) Search(p1 string) bool {
 
 	// prepare invocation
 	params := make([]interface{}, 1)
@@ -54,5 +54,5 @@ func (proxy DataBankProxy) Search(p1 string) bool {
 	req := requestor.Requestor{}
 	result := req.Invoke(inv).([]interface{})
 
-	return bool(result[0].(float64))
+	return result[0].(bool)
 }

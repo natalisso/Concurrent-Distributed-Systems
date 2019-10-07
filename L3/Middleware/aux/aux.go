@@ -1,10 +1,10 @@
 package aux
 
 type Invocation struct {
-	Host string
-	Port int
+	Host    string
+	Port    int
 	Request Request
-	id int
+	Id      int
 }
 
 type Termination struct {
@@ -23,6 +23,5 @@ type Request struct {
 }
 
 type Reply struct {
-	Result []interface{};
+	Result []interface{}
 }
-

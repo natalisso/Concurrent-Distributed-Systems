@@ -2,8 +2,8 @@ package shared
 
 import (
 	"log"
-	"strconv"
 	"net"
+	"strconv"
 )
 
 const SAMPLE_SIZE = 1000
@@ -11,15 +11,17 @@ const CALCULATOR_PORT = 1313
 const NAMING_PORT = 1414
 const MIOP_REQUEST = 1
 const MIOP_REPLY = 2
+const N_INSTANCES = 5
 
 type Request struct {
 	Op string
-	P1 int
-	P2 int
+	P1 string
+	P2 string
+	P3 int
 }
 
 type Reply struct {
-	Result []interface{};
+	Result []interface{}
 }
 
 type Args struct {
@@ -51,4 +53,3 @@ func FindNextAvailablePort() int { // TCP only
 	}
 	return i
 }
-

@@ -2,51 +2,38 @@ package invoker
 
 import (
 	"App/impl"
+	"Middleware/Distribution/lifecycleManagement"
 	"Middleware/Distribution/marshaller"
 	"Middleware/Distribution/miop"
 	"Middleware/Infrastructure/srh"
 	"shared"
-	"Middleware/Distribution/lifecycleManagement"
-
+	"fmt"
 )
 
-type DataBankInvoker struct{}
+type DataBaseInvoker struct{}
 
-const N_INSTANCES = 5
-
-func NewDataBankInvoker() DataBankInvoker {
-	p := new(DataBankInvoker)
+func NewDataBaseInvoker() DataBaseInvoker {
+	p := new(DataBaseInvoker)
 
 	return *p
 }
 
-// ESSE É  DO SERVIDOR
-
-func (DataBankInvoker) Invoke() {
+func (DataBaseInvoker) Invoke() {
 	srhImpl := srh.SRH{ServerHost: "localhost", ServerPort: shared.CALCULATOR_PORT}
 	marshallerImpl := marshaller.Marshaller{}
 	miopPacketReply := miop.Packet{}
 	replParams := make([]interface{}, 1)
-	Objects []impl.DataBank
-
-	var lc lifecycleManagement.lifecycleMan
+	var Objects []impl.DataBase
+	var lifecycleMan lifecycleManagement.LifecycleMan
 
 	// 	Por pooling cria-se vários Instância do objeto remoto
-	for i = 0; i < N_INSTANCES; i++ {
-		dataBankImpl := impl.DataBank{id: i}
-		lc.registerObject(dataBankImpl) // registra no life cycle management
-		append(Objects, dataBankImpl) // registra no invoker
-	}
-
-	// // Cria o objeto remoto
-	// dataBankImpl := impl.DataBank{}
+	Objects = lifecycleMan.NewLifecycleMan()
 
 	// Loop de inversão de controle,
-	// AQUI O SERVIDOR FICA RECEBENDO E MANDANDO MENSAGEM PARA O CLIENTE
 	for {
 		// Invoca o server request handler para receber uma mensagem com a invocação do cliente (request)
 		rcvMsgBytes := srhImpl.Receive()
-		
+
 		// Deserializa a mensagem de request
 		miopPacketRequest := marshallerImpl.Unmarshall(rcvMsgBytes)
 
@@ -59,12 +46,12 @@ func (DataBankInvoker) Invoke() {
 		// Decide qual  método invocar (demultiplexação) e invoca-o no objeto remoto
 		switch operation {
 		case "Save":
-			_p1 := string(miopPacketRequest.Bd.ReqBody.Body[0].(float64))
-			_p2 := string(miopPacketRequest.Bd.ReqBody.Body[1].(float64))
-			_p3 := int(miopPacketRequest.Bd.ReqBody.Body[1].(float64))
+			_p1 := string(miopPacketRequest.Bd.ReqBody.Body[0].(string))
+			_p2 := string(miopPacketRequest.Bd.ReqBody.Body[1].(string))
+			_p3 := int(miopPacketRequest.Bd.ReqBody.Body[2].(float64))
 			replParams[0] = Objects[id].Save(_p1, _p2, _p3)
 		case "Search":
-			_p1 := string(miopPacketRequest.Bd.ReqBody.Body[0].(float64))
+			_p1 := string(miopPacketRequest.Bd.ReqBody.Body[0].(string))
 			replParams[0] = Objects[id].Search(_p1)
 		}
 

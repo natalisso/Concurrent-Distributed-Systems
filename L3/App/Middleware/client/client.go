@@ -1,30 +1,27 @@
 package main
 
 import (
-	"Middleware/Services/naming/proxy"
 	"Middleware/Distribution/proxies"
+	"Middleware/Services/naming/proxy"
 	"fmt"
 	// "time"
 )
 
-func ExecuteExperiment() {
+func runClient() {
 	// create a built-in proxy of naming service
 	namingService := proxy.NamingProxy{}
 
 	// look for a service in naming service
-	calculator := namingService.Lookup("Calculator").(proxies.CalculatorProxy)
+	calculator := namingService.Lookup("DataBase").(proxies.DataBaseProxy)
 
 	// invoke remote operation
 	for i := 0; i < 5; i++ {
-		// t1 := time.Now()
-		fmt.Println(calculator.Save("Nome", "12312312312", 29))
-		// calculator.Add(1,2)
-		// fmt.Println(time.Now().Sub(t1))
+		fmt.Println(calculator.Save("Nome", "85324", 1929))
 	}
 
 }
 
 func main() {
-	go ExecuteExperiment()
+	go runClient()
 	fmt.Scanln()
 }
