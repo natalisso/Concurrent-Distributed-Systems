@@ -19,7 +19,7 @@ func NewDataBaseProxy() DataBaseProxy {
 	p.Proxy.TypeName = reflect.TypeOf(DataBaseProxy{}).String()
 	p.Proxy.Host = "localhost"
 	//p.Proxy.Port = shared.FindNextAvailablePort()  // TODO
-	p.Proxy.Port = shared.CALCULATOR_PORT
+	p.Proxy.Port = shared.DATABASE_PORT
 	p.Proxy.Id = rand.Intn(shared.N_INSTANCES)
 	return *p
 }

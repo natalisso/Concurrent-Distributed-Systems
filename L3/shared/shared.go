@@ -7,7 +7,7 @@ import (
 )
 
 const SAMPLE_SIZE = 1000
-const CALCULATOR_PORT = 1313
+const DATABASE_PORT = 1313
 const NAMING_PORT = 1414
 const MIOP_REQUEST = 1
 const MIOP_REPLY = 2

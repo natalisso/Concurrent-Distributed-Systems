@@ -12,11 +12,12 @@ func runClient() {
 	namingService := proxy.NamingProxy{}
 
 	// look for a service in naming service
-	calculator := namingService.Lookup("DataBase").(proxies.DataBaseProxy)
+	dtBase := namingService.Lookup("DataBase").(proxies.DataBaseProxy)
 
 	// invoke remote operation
-	for i := 0; i < 5; i++ {
-		fmt.Println(calculator.Save("Nome", "85324", 1929))
+	for i := 0; i < 100000; i++ {
+		rep := dtBase.Save("Nome", "8532-4", 1929)
+		fmt.Println(rep)
 	}
 
 }
