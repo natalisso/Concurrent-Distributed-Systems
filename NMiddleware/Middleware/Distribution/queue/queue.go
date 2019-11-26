@@ -1,11 +1,7 @@
 package queue
 
-import (
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/miop"
-)
-
 type Queue struct {
-	Queue     []miop.Message
+	Queue     []string
 	QueueSize int
 }
 
@@ -18,13 +14,13 @@ func NewQueue() Queue {
 }
 
 // Enqueue ...
-func (q* Queue) Enqueue(msg miop.Message) {
+func (q *Queue) Enqueue(msg string) {
 	q.Queue = append(q.Queue, msg)
 	q.QueueSize++
 }
 
 // Dequeue ...
-func (q *Queue) Dequeue() miop.Message {
+func (q *Queue) Dequeue() string {
 	msg := q.Queue[q.QueueSize-1]
 	q.Queue = q.Queue[:q.QueueSize-1]
 	q.QueueSize--
