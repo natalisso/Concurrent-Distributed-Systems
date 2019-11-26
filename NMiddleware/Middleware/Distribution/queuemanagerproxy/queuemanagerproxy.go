@@ -4,24 +4,29 @@ import (
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/marshaller"
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/miop"
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Infrastructure/clientrequesthandler"
+	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Infrastructure/serverrequesthandler"
 	"Concurrent-Distributed-Systems/NMiddleware/shared"
 )
 
 type QueueManagerProxy struct {
 	queueName string
-	crh       clientrequesthandler
+	crh       clientrequesthandler.ClientRequestHandler
+	host      string // ESSE É DO PUBLISH/SUBSCRIBER
+	port      int
 }
 
-func NewQueueManagerProxy(qName string, perst bool) QueueManagerProxy {
+func NewQueueManagerProxy(qName string, perst bool, myHost string, myPort int) QueueManagerProxy {
 	qmp := new(QueueManagerProxy)
 	qmp.queueName = qName
-	qmp.crh = clientrequesthandler.NewClientRequestHandler(hared.N_HOST, shared.NAMING_PORT, perst)
+	qmp.crh = clientrequesthandler.NewClientRequestHandler(shared.N_HOST, shared.NAMING_PORT, perst)
+	qmp.host = myHost
+	qmp.port = myPort
 
 	return *qmp
 }
 
-func (qmp *QueueManagerProxy) Send(m string) {
-	// Cliente (produtor/ consumidor) está enviando uma mensagem pro serviço de mensageria
+// Cliente (produtor/ consumidor) está enviando uma mensagem pro serviço de mensageria
+func (qmp *QueueManagerProxy) Send(m string, operation string) {
 	marshaller := new(marshaller.Marshaller)
 	message := new(miop.Message)
 	packet := new(miop.RequestPacket)
@@ -33,17 +38,20 @@ func (qmp *QueueManagerProxy) Send(m string) {
 	// Configurando o pacote
 	rpb := new(miop.RequestPacketBody)
 	rpb.Parameters = make([]interface{}, 0)
-	rpb.Message = message
-	packet.PacketBody = rpb
-	packet.PacketHeader.Operation = "send"
+	rpb.Parameters = append(rpb.Parameters, qmp.host, qmp.port) // PARA O S.M CONSEGUIR ME ENVIAR A MENSAGEM CASO EU SEJA UM SUBSCRIBER
 
-	crh.Send(marshaller.Marshall(*packet))
+	rpb.Message = *message
+	packet.PacketBody = *rpb
+	packet.PacketHeader.Operation = operation
+
+	qmp.crh.Send(marshaller.Marshall(*packet))
 }
 
-func (qmp *QueueManagerProxy) Receive() miop.RequestPacket {
-	// Cliente (produtor/ consumidor) está recebendo uma mensagem do serviço de mensageria
-	crh := clientrequesthandler.NewClientRequestHandler(shared.N_HOST, shared.NAMING_PORT, false)
+// Cliente (produtor/ consumidor) está recebendo uma mensagem do serviço de mensageria
+func (qmp *QueueManagerProxy) Receive() string {
+	//crh := clientrequesthandler.NewClientRequestHandler(shared.N_HOST, shared.NAMING_PORT, false)
+	srh := serverrequesthandler.NewServerRequestHandler(qmp.host, qmp.port)
 	marshaller := new(marshaller.Marshaller)
 
-	return marshaller.Unmarshall(crh.Receive()).PacketBody.Message
+	return marshaller.Unmarshall(srh.Receive()).PacketBody.Message.BodyMsg.Body
 }

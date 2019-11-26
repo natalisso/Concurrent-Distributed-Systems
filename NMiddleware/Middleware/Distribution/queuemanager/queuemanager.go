@@ -27,7 +27,6 @@ func NewQueueManager(sHost string, iPort int) QueueManager {
 // o serviço de mensageria está enviando uma mensagem
 // vai utilizar o server request handler
 func (qm *QueueManager) Send(msg string) {
-	
 
 }
 
@@ -35,10 +34,10 @@ func (qm *QueueManager) Send(msg string) {
 // vai utilizar o client request handler
 func (qm *QueueManager) Receive() {
 
-	srh := clientrequesthandler.NewClientRequestHandler(shared.N_HOST, shared.NAMING_PORT)
+	crh := clientrequesthandler.NewClientRequestHandler(shared.N_HOST, shared.NAMING_PORT)
 	marshall := new(marshaller.Marshaller)
 
-	rcvBytes := srh.Receive()
+	rcvBytes := crh.Receive()
 	packetRcv := marshall.Unmarshall(rcvBytes)
 
 	nameQueue := packetRcv.PacketBody.Message.HeaderMsg.Destination

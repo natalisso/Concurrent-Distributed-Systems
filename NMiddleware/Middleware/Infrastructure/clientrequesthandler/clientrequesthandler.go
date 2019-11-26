@@ -9,18 +9,18 @@ import (
 
 // ClientRequestHandler para produtor e consumidor
 type ClientRequestHandler struct {
-	host               string
-	port               int
+	hostToConn         string
+	portToConn         int
 	expectedReply      bool
 	clientSocket       net.Conn
 	sentMessageSize    int
 	receiveMessageSize int
 }
 
-func NewClientRequestHandler(host string, port int, expected bool) clientRequestHandler {
+func NewClientRequestHandler(host string, port int, expected bool) ClientRequestHandler {
 	crh := new(ClientRequestHandler)
-	crh.host = host
-	crh.port = port
+	crh.hostToConn = host
+	crh.portToConn = port
 	crh.expectedReply = expected
 
 	return *crh
@@ -32,7 +32,7 @@ func (crh *ClientRequestHandler) Send(msgToSend []byte) {
 	var conn net.Conn
 	var err error
 
-	conn, err = net.Dial("tcp", crh.host+":"+strconv.Itoa(crh.port))
+	conn, err = net.Dial("tcp", crh.hostToConn+":"+strconv.Itoa(crh.portToConn))
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
@@ -50,12 +50,12 @@ func (crh *ClientRequestHandler) Send(msgToSend []byte) {
 	}
 
 	// Salvo a conexão para poder lê-la depois, caso necessário
-	if crh.expectedReply {
-		crh.clientSocket = conn
-	} else {
-		// Se não, fecho-a
-		conn.Close()
-	}
+	// if crh.expectedReply {
+	// 	crh.clientSocket = conn
+	// } else {
+	// Se não, fecho-a
+	conn.Close()
+	//	}
 
 	return
 }

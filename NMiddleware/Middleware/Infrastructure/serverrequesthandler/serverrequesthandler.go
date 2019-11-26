@@ -74,5 +74,8 @@ func (srh *ServerRequestHandler) Receive() []byte {
 		log.Fatalf("SRH:: %s", err)
 	}
 
+	srh.ln.Close()
+	srh.serverSocket.Close()
+
 	return msg
 }
