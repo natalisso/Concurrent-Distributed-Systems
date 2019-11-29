@@ -1,4 +1,4 @@
-package queuemanager
+package broker
 
 import (
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/marshaller"
@@ -9,8 +9,8 @@ import (
 )
 
 // Isso vai estar no serviço de mensageria
-// QueueManager -> Gerenciador das filas
-type QueueManager struct {
+// Broker -> Gerenciador das filas
+type Broker struct {
 	Host   string
 	port   int
 	Queues map[string]queue.Queue
@@ -18,8 +18,8 @@ type QueueManager struct {
 	sm     subscribermanager.SubscriberManager
 }
 
-func NewQueueManager(sHost string, iPort int) QueueManager {
-	qm := new(QueueManager)
+func NewBroker(sHost string, iPort int) Broker {
+	qm := new(Broker)
 	qm.Host = sHost
 	qm.port = iPort
 	qm.Queues = make(map[string]queue.Queue) // Inicialmente vazio
@@ -30,13 +30,13 @@ func NewQueueManager(sHost string, iPort int) QueueManager {
 
 // o serviço de mensageria está enviando uma mensagem
 // vai utilizar o client request handler (vai se conectar com um dos extremos para enviar a mensagem)
-func (qm *QueueManager) Send(msg string) {
+func (qm *Broker) Send(msg string) {
 
 }
 
 // serviço de mensageria está recebendo uma mensagem
 // vai utilizar o server request handler (sempre atv)
-func (qm *QueueManager) Receive() {
+func (qm *Broker) Receive() {
 
 	marshall := new(marshaller.Marshaller)
 
