@@ -13,6 +13,7 @@ type BrokerProxy struct {
 	crh       clientrequesthandler.ClientRequestHandler
 	host      string // ESSE É DO PUBLISH/SUBSCRIBER
 	port      int
+	
 }
 
 func NewBrokerProxy(qName string, perst bool, myHost string, myPort int) BrokerProxy {
