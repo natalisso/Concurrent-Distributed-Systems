@@ -2,28 +2,33 @@ package exchange
 
 import (
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/bind"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/miop"
 )
 
 type Exchange struct {
-	Bind bind.Bind
+	Name    string
+	Type    string
+	Durable bool
+	Bind    bind.Bind
 }
 
-func NewExchange() Exchange {
+func NewExchange(typ string, durable bool) Exchange {
 	ex := new(Exchange)
 	ex.Bind = bind.NewBind()
+	ex.Type = typ
+	ex.Durable = durable
 	return *ex
 }
 
-func (ex *Exchange) findQueue(pkt miop.RequestPacket) []string {
-	var queues []string
+// Find
+func (ex Exchange) FindQueues(bindKey string) []string {
+	var nameQueues []string
 	// OBS: TEM QUE AJEITAR LOGO AS INFORMAÇÕES DO PACOTE E DAS MENSAGENS
 	// TO USANDO OQ TÁ, MAS TEM QUE MUDAR DPS I GUESS
-	if pkt.PacketHeader.Operation == "direct" {
-		queues = append(queues, pkt.PacketBody.Message.HeaderMsg.Destination)
-	} else if pkt.PacketHeader.Operation == "topic" {
-		queues = append(queues, ex.Bind.SearchQueue(pkt.PacketBody.Message.HeaderMsg.Destination)...)
+	if ex.Type == "direct" {
+		nameQueues = append(nameQueues, bindKey)
+	} else if ex.Type == "topic" {
+		nameQueues = append(nameQueues, ex.Bind.SearchQueue(bindKey)...)
 	}
 
-	return queues
+	return nameQueues
 }

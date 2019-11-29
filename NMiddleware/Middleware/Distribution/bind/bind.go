@@ -25,7 +25,7 @@ func (bind *Bind) SearchQueue(bindKey string) []string {
 			// Aqui irá ser feito a comparação de string e todo trabalho chato
 			// Para verificar se der match, utiliza bkQueue[i]; Caso dê
 			// faz matchs = append(matchs, bkQueue[i]) e da um break, pra ir p proxima queue
-			fmt.Println("%s", queue)
+			fmt.Println(queue) //Tira esse print, botei só pro go chatoland nao reclamar de erro no codigo
 		}
 	}
 	return matchs

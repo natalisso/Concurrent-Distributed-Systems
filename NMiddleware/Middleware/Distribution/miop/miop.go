@@ -51,12 +51,13 @@ type Message struct {
 
 type MessageHeader struct {
 	// Nome da fila onde a mensagem será armazenada
-	Destination string
+	DestinationQueue string
 }
 
 type MessageBody struct {
 	Body string
 }
+
 // Mensagem ficará dentro de um packet
 
 type RequestPacket struct {
@@ -64,14 +65,20 @@ type RequestPacket struct {
 	PacketBody   RequestPacketBody
 }
 
+//RequestPacketHeader ...
 type RequestPacketHeader struct {
-	Operation string
+	Operation        string
+	Exchange_name    string
+	Exchange_type    string
+	Exchange_durable bool
+	Bind_keys        string
 }
 
 type RequestPacketBody struct {
 	Parameters []interface{}
-	Message Message
+	Message    Message
 }
+
 // Enquanto message é usada para comunicação entre as aplicações (produtor/consumidor)
 //, packet é usado para comunicação cliente/servidor dos consumidores e produtores (clientes)
-// com o servidor de fila (servidor). 
+// com o servidor de fila (servidor).
