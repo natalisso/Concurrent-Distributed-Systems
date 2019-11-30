@@ -8,10 +8,10 @@ import (
 )
 
 type ServerRequestHandler struct {
-	serverHost   string
-	serverPort   int
-	serverSocket net.Conn
-	ln           net.Listener
+	serverHost string
+	serverPort int
+	//	ConnServer     []net.Conn
+	ListenerServer net.Listener
 }
 
 func NewServerRequestHandler(host string, port int) ServerRequestHandler {
@@ -19,49 +19,49 @@ func NewServerRequestHandler(host string, port int) ServerRequestHandler {
 	srh.serverHost = host
 	srh.serverPort = port
 
+	// Cria o listener
+	var err error
+	srh.ListenerServer, err = net.Listen("tcp", srh.serverHost+":"+strconv.Itoa(srh.serverPort))
+	if err != nil {
+		log.Fatalf("SRH:: %s", err)
+	}
+
 	return *srh
 }
 
-func (srh *ServerRequestHandler) Send(msgToClient []byte) {
+func (srh *ServerRequestHandler) Send(msgToClient []byte, conn net.Conn, close bool) {
 
 	// Envia o tamanho da mensagem
 	size := make([]byte, 4)
 	l := uint32(len(msgToClient))
 	binary.LittleEndian.PutUint32(size, l)
-	_, err := srh.serverSocket.Write(size)
+	_, err := conn.Write(size)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 
 	// Envia mensagem
-	_, err = srh.serverSocket.Write(msgToClient)
+	_, err = conn.Write(msgToClient)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 
-	// Fecha conexão
-	srh.serverSocket.Close()
-	srh.ln.Close()
+	if close == true {
+		conn.Close()
+	}
 }
 
-func (srh *ServerRequestHandler) Receive() []byte {
-
-	// Cria o llistener
-	var err error
-	srh.ln, err = net.Listen("tcp", srh.serverHost+":"+strconv.Itoa(srh.serverPort))
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
+func (srh *ServerRequestHandler) Receive() ([]byte, net.Conn) {
 
 	// Aceita conexão
-	srh.serverSocket, err = srh.ln.Accept()
+	conn, err := srh.ListenerServer.Accept()
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 
 	// Recebe tamanho da mensagem
 	size := make([]byte, 4)
-	_, err = srh.serverSocket.Read(size)
+	_, err = conn.Read(size)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
@@ -69,13 +69,14 @@ func (srh *ServerRequestHandler) Receive() []byte {
 
 	// Recebe mensagem
 	msg := make([]byte, sizeInt)
-	_, err = srh.serverSocket.Read(msg)
+	_, err = conn.Read(msg)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 
-	srh.ln.Close()
-	srh.serverSocket.Close()
+	return msg, conn
+}
 
-	return msg
+func (srh *ServerRequestHandler) CloseSRH() {
+	srh.ListenerServer.Close()
 }

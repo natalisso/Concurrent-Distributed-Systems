@@ -3,10 +3,12 @@ package broker
 import (
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/exchange"
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/marshaller"
+	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/miop"
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/queue"
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Infrastructure/serverrequesthandler"
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Infrastructure/subscribermanager"
 	"Concurrent-Distributed-Systems/NMiddleware/shared"
+	"fmt"
 )
 
 // Isso vai estar no serviço de mensageria
@@ -23,12 +25,12 @@ type Broker struct {
 // Vou ter varios Exchanges no broker, cada exchange tem seu proprio tipo
 // e seus próprios binds
 
-func NewBroker(sHost string, iPort int) Broker {
+func NewBroker() Broker {
 	qm := new(Broker)
-	qm.Host = sHost
-	qm.port = iPort
+	qm.Host = shared.N_HOST_MD
+	qm.port = shared.N_PORT_MD
 	qm.Queues = make(map[string]queue.Queue) // Inicialmente vazio
-	qm.srh = serverrequesthandler.NewServerRequestHandler(shared.N_HOST, shared.NAMING_PORT)
+	qm.srh = serverrequesthandler.NewServerRequestHandler(shared.N_HOST_MD, shared.N_PORT_MD)
 	qm.sm = subscribermanager.NewSubscriberManager()
 	qm.Exchange = make(map[string]exchange.Exchange)
 	return *qm
@@ -36,8 +38,37 @@ func NewBroker(sHost string, iPort int) Broker {
 
 // o serviço de mensageria está enviando uma mensagem
 // vai utilizar o client request handler (vai se conectar com um dos extremos para enviar a mensagem)
-func (qm *Broker) Send(msg string) {
+func (qm *Broker) send(pkg miop.RequestPacket, queueNames []string) {
 
+	marshall := new(marshaller.Marshaller)
+
+	for i := 0; i < len(queueNames); i++ {
+		subscribers := qm.sm.SubscribersInQueue(queueNames[i])
+		for j := 0; j < len(subscribers); j++ {
+			qm.srh.Send(marshall.Marshall(pkg), subscribers[j].Conn, false)
+		}
+	}
+}
+
+func (qm *Broker) sendFor(subscriber subscribermanager.Subscriber, queueName string) {
+	marshall := new(marshaller.Marshaller)
+
+	// POSSÍVEL MUTEX AQUI
+	allMessages := qm.Queues[queueName].AllMessages()
+	var pkg miop.RequestPacket
+	var msg miop.Message
+
+	for i := 0; i < len(allMessages); i++ {
+		msg.BodyMsg.Body = allMessages[i]
+		pkg.PacketBody.Message = msg
+		qm.srh.Send(marshall.Marshall(pkg), subscriber.Conn, false)
+	}
+}
+
+func (qm *Broker) Manager() {
+	for true {
+		qm.Receive()
+	}
 }
 
 // serviço de mensageria está recebendo uma mensagem
@@ -46,8 +77,10 @@ func (qm *Broker) Receive() {
 
 	// Recebe o pacote
 	marshall := new(marshaller.Marshaller)
-	rcvBytes := qm.srh.Receive()
+	fmt.Println("Esperando mensagem")
+	rcvBytes, conn := qm.srh.Receive()
 	packetRcv := marshall.Unmarshall(rcvBytes)
+	fmt.Println("Chegou :)")
 
 	if packetRcv.PacketHeader.Operation == "publish" {
 		bindKey := packetRcv.PacketHeader.Bind_keys
@@ -55,21 +88,59 @@ func (qm *Broker) Receive() {
 
 		queuesNames := qm.Exchange[exchangeName].FindQueues(bindKey)
 
-		for i := 0; i < len(queuesNames); i++ {
-			// BOTAR UM MUTEX AQUI!!!
-			queueAux := qm.Queues[queuesNames[i]]
-			queueAux.Enqueue(packetRcv.PacketBody.Message.BodyMsg.Body)
+		if len(queuesNames) > 0 {
+			for i := 0; i < len(queuesNames); i++ {
+				// BOTAR UM MUTEX AQUI!!!
+				queueAux := qm.Queues[queuesNames[i]]
+				queueAux.Enqueue(packetRcv.PacketBody.Message.BodyMsg.Body)
+			}
+			qm.send(packetRcv, queuesNames)
+		} else {
+			fmt.Println("Discarted message!!!!")
 		}
 
-	} else if packetRcv.PacketHeader.Operation == "createExchange" {
-		qm.Exchange[packetRcv.PacketHeader.Exchange_name] = exchange.NewExchange(packetRcv.PacketHeader.Exchange_type, packetRcv.PacketHeader.Exchange_durable)
+		conn.Close()
+
+	} else if packetRcv.PacketHeader.Operation == "create_exchange" {
+		if _, exist := qm.Exchange[packetRcv.PacketHeader.Exchange_name]; !exist {
+			qm.Exchange[packetRcv.PacketHeader.Exchange_name] = exchange.NewExchange(packetRcv.PacketHeader.Exchange_type, packetRcv.PacketHeader.Exchange_durable)
+			fmt.Printf("Created exchange: %s", packetRcv.PacketHeader.Exchange_name)
+		} else {
+			fmt.Printf("Exchange: %s already exist!", packetRcv.PacketHeader.Exchange_name)
+		}
+
+		conn.Close()
+	} else if packetRcv.PacketHeader.Operation == "create_queue" {
+		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.DestinationQueue
+		nExist := true
+		for nQueue := range qm.Queues {
+			if nQueue == nameQueue {
+				nExist = false
+			}
+		}
+		if nExist {
+			// MUTEX AQUI
+			qm.Queues[nameQueue] = queue.NewQueue()
+		}
+		subs := subscribermanager.NewSubscriber(conn)
+		qm.sm.SubscriberClient(nameQueue, subs)
+
+		if !nExist {
+
+		}
+		// O Subscriber irá criar a fila, caso não exista, e com isso será associado a ela de qualquer modo.
+
+	} else if packetRcv.PacketHeader.Operation == "bind_queue" {
+		nameExg := packetRcv.PacketHeader.Exchange_name
+		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.DestinationQueue
+		bindKey := packetRcv.PacketHeader.Bind_keys
+		// ver se pega
+		if _, exist := qm.Exchange[nameExg]; exist {
+			aux := qm.Exchange[nameExg]
+			aux.Bind.BindQueue(nameQueue, bindKey)
+			fmt.Println("binded queue")
+		} else {
+			fmt.Printf("Exchange: %s Doesn't exist!!!\n", nameExg)
+		}
 	}
 }
-
-// nameQueue := packetRcv.PacketBody.Message.HeaderMsg.Destination
-// host := packetRcv.PacketBody.Parameters[0] // IP string
-// port := packetRcv.PacketBody.Parameters[1] // PORT int
-
-// sb := subscribermanager.NewSubscriber(host.(string), port.(int))
-
-// qm.sm.Save(nameQueue, sb)

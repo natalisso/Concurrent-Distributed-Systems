@@ -12,7 +12,13 @@ const NAMING_PORT = 1414
 const MIOP_REQUEST = 1
 const MIOP_REPLY = 2
 const N_INSTANCES = 5
-const N_HOST = "localhost"
+
+const N_HOST_MD = "localhost"
+const N_HOST_PB = "localhost"
+const N_HOST_SB = "localhost"
+const N_PORT_MD = 1313
+const N_PORT_PB = 1414
+const N_PORT_SB = 1515
 
 type Request struct {
 	Op string

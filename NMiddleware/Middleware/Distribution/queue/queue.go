@@ -27,3 +27,11 @@ func (q *Queue) Dequeue() string {
 
 	return msg
 }
+
+func (q Queue) AllMessages() []string {
+	msgs := make([]string, 0)
+	for i := 0; i < q.QueueSize; i++ {
+		msgs = append(msgs, q.Queue[i])
+	}
+	return msgs
+}

@@ -20,7 +20,7 @@ func (NamingInvoker) Invoke() {
 	replyParams := make([]interface{}, 1)
 
 	// control loop
-	for {
+	for {	
 		// receive request packet
 		rcvMsgBytes := srhImpl.Receive()
 

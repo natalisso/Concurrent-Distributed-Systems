@@ -12,7 +12,7 @@ type ClientRequestHandler struct {
 	hostToConn         string
 	portToConn         int
 	expectedReply      bool
-	clientSocket       net.Conn
+	clientConn         net.Conn
 	sentMessageSize    int
 	receiveMessageSize int
 }
@@ -26,25 +26,28 @@ func NewClientRequestHandler(host string, port int, expected bool) ClientRequest
 	return *crh
 }
 
-// Send Envia os bytes
-func (crh *ClientRequestHandler) Send(msgToSend []byte) {
-
-	var conn net.Conn
-	var err error
-
-	conn, err = net.Dial("tcp", crh.hostToConn+":"+strconv.Itoa(crh.portToConn))
+func (crh *ClientRequestHandler) Connection() {
+	conn, err := net.Dial("tcp", crh.hostToConn+":"+strconv.Itoa(crh.portToConn))
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
+	crh.clientConn = conn
+}
+
+// Send Envia os bytes
+func (crh *ClientRequestHandler) Send(msgToSend []byte) {
 
 	// Manda o tamanho da mensagem para o servidor
 	sizeMsgToServer := make([]byte, 4)
 	l := uint32(len(msgToSend))
 	binary.LittleEndian.PutUint32(sizeMsgToServer, l)
-	conn.Write(sizeMsgToServer)
+	_, err := crh.clientConn.Write(sizeMsgToServer)
+	if err != nil {
+		log.Fatalf("CRH:: %s", err)
+	}
 
 	// Manda mensagem
-	_, err = conn.Write(msgToSend)
+	_, err = crh.clientConn.Write(msgToSend)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
@@ -52,25 +55,20 @@ func (crh *ClientRequestHandler) Send(msgToSend []byte) {
 	// Salvo a conexão para poder lê-la depois, caso necessário
 	// if crh.expectedReply {
 	// 	crh.clientSocket = conn
-	// } else {
-	// Se não, fecho-a
-	conn.Close()
-	//	}
-
-	return
+	//
 }
 
 // Receive recebe os bytes
 func (crh *ClientRequestHandler) Receive() []byte {
 	sizeMsgFromServer := make([]byte, 4)
-	_, err := crh.clientSocket.Read(sizeMsgFromServer)
+	_, err := crh.clientConn.Read(sizeMsgFromServer)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
 	sizeFromServerInt := binary.LittleEndian.Uint32(sizeMsgFromServer)
 
 	msgFromServer := make([]byte, sizeFromServerInt)
-	_, err = crh.clientSocket.Read(msgFromServer)
+	_, err = crh.clientConn.Read(msgFromServer)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
