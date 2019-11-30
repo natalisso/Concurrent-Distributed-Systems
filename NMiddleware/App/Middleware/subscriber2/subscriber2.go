@@ -6,19 +6,15 @@ import (
 	"fmt"
 )
 
-// PRODUTOR
+// CONSUMIDOR
 func main() {
 	bp := brokerproxy.NewBrokerProxy("", true, shared.N_HOST_PB, shared.N_PORT_SB)
 	//bp.ConnectionBroker()
 
-	bp.Exchange_Declare("Direct-X", "direct")
-	msg := "Olá, consumidor!"
+	bp.Queue_Declare("Direct-Q")
+	bp.Queue_Bind("Direct-X", "Direct-Q", "Key1")
 
-	fmt.Println("Ready to send a message")
-	fmt.Scanln()
-	for i := 0; i < 5000; i++ {
-		bp.Basic_Publish("Direct-X", "Key1", msg)
+	for true {
+		fmt.Printf("Received: %s\n", bp.Basic_Consume("Direct-Q"))
 	}
-
-	fmt.Scanln()
 }

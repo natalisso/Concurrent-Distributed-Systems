@@ -77,7 +77,7 @@ func (qm *Broker) Receive() {
 
 	// Recebe o pacote
 	marshall := new(marshaller.Marshaller)
-	fmt.Println("Esperando mensagem")
+	//fmt.Println("Esperando mensagem")
 	rcvBytes, conn := qm.srh.Receive()
 	packetRcv := marshall.Unmarshall(rcvBytes)
 	fmt.Printf("Chegou: %s; bindkey: %s\n", packetRcv.PacketBody.Message.BodyMsg.Body, packetRcv.PacketHeader.Bind_keys)

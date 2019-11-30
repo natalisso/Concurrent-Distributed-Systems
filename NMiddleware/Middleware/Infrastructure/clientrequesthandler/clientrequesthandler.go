@@ -27,9 +27,14 @@ func NewClientRequestHandler(host string, port int, expected bool) ClientRequest
 }
 
 func (crh *ClientRequestHandler) Connection() {
-	conn, err := net.Dial("tcp", crh.hostToConn+":"+strconv.Itoa(crh.portToConn))
-	if err != nil {
-		log.Fatalf("CRH:: %s", err)
+	var conn net.Conn
+	var err error
+	for {
+		conn, err = net.Dial("tcp", crh.hostToConn+":"+strconv.Itoa(crh.portToConn))
+		if err == nil {
+			//log.Fatalf("CRH erro no Dial:: %s", err)
+			break
+		}
 	}
 	crh.clientConn = conn
 }
