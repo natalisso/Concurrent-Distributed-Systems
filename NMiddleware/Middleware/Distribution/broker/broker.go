@@ -80,19 +80,23 @@ func (qm *Broker) Receive() {
 	fmt.Println("Esperando mensagem")
 	rcvBytes, conn := qm.srh.Receive()
 	packetRcv := marshall.Unmarshall(rcvBytes)
-	fmt.Println("Chegou :)")
+	fmt.Printf("Chegou: %s; bindkey: %s\n", packetRcv.PacketBody.Message.BodyMsg.Body, packetRcv.PacketHeader.Bind_keys)
 
 	if packetRcv.PacketHeader.Operation == "publish" {
 		bindKey := packetRcv.PacketHeader.Bind_keys
 		exchangeName := packetRcv.PacketHeader.Exchange_name
 
 		queuesNames := qm.Exchange[exchangeName].FindQueues(bindKey)
-
-		if len(queuesNames) > 0 {
+		fmt.Printf("tamanho queuenames: %d\n", len(queuesNames))
+		if len(queuesNames) > 0 { // Existe fila que encaixam com esse bindkey
 			for i := 0; i < len(queuesNames); i++ {
 				// BOTAR UM MUTEX AQUI!!!
+				fmt.Printf("mensagens na fila %s, antes do enqueue: %d\n", queuesNames[i], len(qm.Queues[queuesNames[i]].Queue))
 				queueAux := qm.Queues[queuesNames[i]]
 				queueAux.Enqueue(packetRcv.PacketBody.Message.BodyMsg.Body)
+				qm.Queues[queuesNames[i]] = queueAux
+
+				fmt.Printf("mensagens na fila %s, dps do enqueue: %d\n", queuesNames[i], len(qm.Queues[queuesNames[i]].Queue))
 			}
 			qm.send(packetRcv, queuesNames)
 		} else {
@@ -100,13 +104,12 @@ func (qm *Broker) Receive() {
 		}
 
 		conn.Close()
-
 	} else if packetRcv.PacketHeader.Operation == "create_exchange" {
 		if _, exist := qm.Exchange[packetRcv.PacketHeader.Exchange_name]; !exist {
 			qm.Exchange[packetRcv.PacketHeader.Exchange_name] = exchange.NewExchange(packetRcv.PacketHeader.Exchange_type, packetRcv.PacketHeader.Exchange_durable)
 			fmt.Printf("Created exchange: %s", packetRcv.PacketHeader.Exchange_name)
 		} else {
-			fmt.Printf("Exchange: %s already exist!", packetRcv.PacketHeader.Exchange_name)
+			fmt.Printf("Exchange: %s already exist!\n", packetRcv.PacketHeader.Exchange_name)
 		}
 
 		conn.Close()
@@ -122,8 +125,6 @@ func (qm *Broker) Receive() {
 			// MUTEX AQUI
 			qm.Queues[nameQueue] = queue.NewQueue()
 		}
-		subs := subscribermanager.NewSubscriber(conn)
-		qm.sm.SubscriberClient(nameQueue, subs)
 
 		if !nExist {
 
@@ -134,13 +135,18 @@ func (qm *Broker) Receive() {
 		nameExg := packetRcv.PacketHeader.Exchange_name
 		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.DestinationQueue
 		bindKey := packetRcv.PacketHeader.Bind_keys
-		// ver se pega
+
 		if _, exist := qm.Exchange[nameExg]; exist {
 			aux := qm.Exchange[nameExg]
 			aux.Bind.BindQueue(nameQueue, bindKey)
+			qm.Exchange[nameExg] = aux
 			fmt.Println("binded queue")
+
+			subs := subscribermanager.NewSubscriber(conn)
+			qm.sm.SubscriberClient(nameQueue, subs)
 		} else {
 			fmt.Printf("Exchange: %s Doesn't exist!!!\n", nameExg)
 		}
+
 	}
 }

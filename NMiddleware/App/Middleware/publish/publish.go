@@ -9,7 +9,7 @@ import (
 // PRODUTOR
 func main() {
 	bp := brokerproxy.NewBrokerProxy("", true, shared.N_HOST_PB, shared.N_PORT_SB)
-	bp.ConnectionBroker()
+	//bp.ConnectionBroker()
 
 	bp.Exchange_Declare("Direct-X", "direct")
 	msg := "Olá, consumidor!"

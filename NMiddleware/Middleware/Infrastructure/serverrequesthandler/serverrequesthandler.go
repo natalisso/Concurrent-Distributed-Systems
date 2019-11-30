@@ -2,6 +2,7 @@ package serverrequesthandler
 
 import (
 	"encoding/binary"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -37,13 +38,13 @@ func (srh *ServerRequestHandler) Send(msgToClient []byte, conn net.Conn, close b
 	binary.LittleEndian.PutUint32(size, l)
 	_, err := conn.Write(size)
 	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+		log.Fatalf("SRH escrita:: %s", err)
 	}
 
 	// Envia mensagem
 	_, err = conn.Write(msgToClient)
 	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+		log.Fatalf("SRH escrita:: %s", err)
 	}
 
 	if close == true {
@@ -56,14 +57,16 @@ func (srh *ServerRequestHandler) Receive() ([]byte, net.Conn) {
 	// Aceita conexão
 	conn, err := srh.ListenerServer.Accept()
 	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+		log.Fatalf("SRH leitura:: %s", err)
 	}
+
+	fmt.Println("Aceitei conexao")
 
 	// Recebe tamanho da mensagem
 	size := make([]byte, 4)
 	_, err = conn.Read(size)
 	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+		log.Fatalf("SRH leitura:: %s", err)
 	}
 	sizeInt := binary.LittleEndian.Uint32(size)
 

@@ -31,6 +31,7 @@ func (qmp *BrokerProxy) ConnectionBroker() {
 }
 
 func (qmp *BrokerProxy) Exchange_Declare(nameExchange string, typeExchange string) {
+	qmp.ConnectionBroker()
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
 
@@ -43,6 +44,7 @@ func (qmp *BrokerProxy) Exchange_Declare(nameExchange string, typeExchange strin
 }
 
 func (qmp *BrokerProxy) Basic_Publish(nameExchange string, routingKey string, msg string) {
+	qmp.ConnectionBroker()
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
 
@@ -57,6 +59,7 @@ func (qmp *BrokerProxy) Basic_Publish(nameExchange string, routingKey string, ms
 }
 
 func (qmp *BrokerProxy) Queue_Declare(nameQueue string) {
+	qmp.ConnectionBroker()
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
 
@@ -67,6 +70,7 @@ func (qmp *BrokerProxy) Queue_Declare(nameQueue string) {
 }
 
 func (qmp *BrokerProxy) Queue_Bind(nameExchange string, nameQueue string, routingKey string) {
+	qmp.ConnectionBroker() // essa vai ser salva pra ler dps
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
 
@@ -87,7 +91,6 @@ func (qmp *BrokerProxy) Basic_Consume(nameQueue string) string {
 // Cliente (produtor/ consumidor) está enviando uma mensagem pro serviço de mensageria
 func (qmp *BrokerProxy) send(pckg miop.RequestPacket) {
 	marshaller := new(marshaller.Marshaller)
-
 	qmp.crh.Send(marshaller.Marshall(pckg))
 }
 

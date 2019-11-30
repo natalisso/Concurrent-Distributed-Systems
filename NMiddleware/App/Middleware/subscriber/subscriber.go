@@ -9,7 +9,7 @@ import (
 // CONSUMIDOR
 func main() {
 	bp := brokerproxy.NewBrokerProxy("", true, shared.N_HOST_PB, shared.N_PORT_SB)
-	bp.ConnectionBroker()
+	//bp.ConnectionBroker()
 
 	bp.Queue_Declare("Direct-Q")
 	bp.Queue_Bind("Direct-X", "Direct-Q", "Key1")
