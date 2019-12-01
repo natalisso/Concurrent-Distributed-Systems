@@ -121,7 +121,7 @@ func (qm *Broker) Receive() {
 		qm.srh.Send(marshall.Marshall(*pckgReply), conn, true)
 
 	} else if packetRcv.PacketHeader.Operation == "create_queue" {
-		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.Destination_Queue
+		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.Destination_queue
 		nExist := true
 		for nQueue := range qm.Queues {
 			if nQueue == nameQueue {
@@ -141,7 +141,7 @@ func (qm *Broker) Receive() {
 
 	} else if packetRcv.PacketHeader.Operation == "bind_queue" {
 		nameExg := packetRcv.PacketHeader.Exchange_name
-		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.Destination_Queue
+		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.Destination_queue
 		bindKey := packetRcv.PacketHeader.Bind_keys
 
 		if _, exist := qm.Exchange[nameExg]; exist {

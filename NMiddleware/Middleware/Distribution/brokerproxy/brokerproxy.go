@@ -1,10 +1,10 @@
 package brokerproxy
 
 import (
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/marshaller"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/miop"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Infrastructure/clientrequesthandler"
-	"Concurrent-Distributed-Systems/NMiddleware/shared"
+	"NMiddleware/Middleware/Distribution/marshaller"
+	"NMiddleware/Middleware/Distribution/miop"
+	"NMiddleware/Middleware/Infrastructure/clientrequesthandler"
+	"NMiddleware/shared"
 	"fmt"
 )
 
@@ -50,7 +50,7 @@ func (qmp *BrokerProxy) Exchange_Declare(nameExchange string, typeExchange strin
 	}
 }
 
-func (qmp *BrokerProxy) basic_Publish(nameExchange string, routingKey string, msg string) {
+func (qmp *BrokerProxy) Basic_Publish(nameExchange string, routingKey string, msg string) {
 	qmp.ConnectionBroker()
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
@@ -60,7 +60,7 @@ func (qmp *BrokerProxy) basic_Publish(nameExchange string, routingKey string, ms
 	packet.PacketHeader.Exchange_name = nameExchange
 	packet.PacketHeader.Bind_keys = routingKey
 	packet.PacketHeader.Operation = "publish"
-	message.HeaderMsg.Life_Time = 60000 * 5 // Tempo em segundo
+	message.HeaderMsg.Life_time = 60000 * 5 // Tempo em segundo
 	packet.PacketBody.Message = *message
 
 	for true {
@@ -78,7 +78,7 @@ func (qmp *BrokerProxy) Queue_Declare(nameQueue string) {
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
 
-	message.HeaderMsg.Destination_Queue = nameQueue
+	message.HeaderMsg.Destination_queue = nameQueue
 	packet.PacketBody.Message = *message
 	packet.PacketHeader.Operation = "create_queue"
 
@@ -97,7 +97,7 @@ func (qmp *BrokerProxy) Queue_Bind(nameExchange string, nameQueue string, routin
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
 
-	message.HeaderMsg.Destination_Queue = nameQueue
+	message.HeaderMsg.Destination_queue = nameQueue
 
 	packet.PacketHeader.Operation = "bind_queue"
 	packet.PacketHeader.Exchange_name = nameExchange

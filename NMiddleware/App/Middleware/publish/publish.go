@@ -19,6 +19,5 @@ func main() {
 	for i := 0; i < 10000; i++ {
 		bp.Basic_Publish("Fanout-X", "Key1.edu.com", msg)
 	}
-
 	fmt.Scanln()
 }
