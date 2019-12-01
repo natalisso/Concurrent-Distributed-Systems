@@ -1,47 +1,5 @@
 package miop
 
-type Packet struct {
-	Hdr Header
-	Bd  Body
-}
-
-type Header struct {
-	Magic       string
-	Version     string
-	ByteOrder   bool
-	MessageType int
-	Size        int
-}
-
-type Body struct {
-	ReqHeader RequestHeader
-	ReqBody   RequestBody
-	RepHeader ReplyHeader
-	RepBody   ReplyBody
-}
-
-type RequestHeader struct {
-	Context          string
-	RequestId        int
-	ResponseExpected bool
-	ObjectKey        int
-	Operation        string
-}
-
-type RequestBody struct {
-	Body []interface{}
-}
-
-type ReplyHeader struct {
-	Context   string
-	RequestId int
-	Status    int
-}
-
-type ReplyBody struct {
-	OperationResult interface{}
-}
-
 // ------------------------------
 
 type Message struct {
@@ -50,9 +8,9 @@ type Message struct {
 }
 
 type MessageHeader struct {
-	// Nome da fila onde a mensagem será armazenada
-	DestinationQueue string
-	lifeTime         int
+	Destination_Queue string
+	Life_Time         int
+	Content_Type      string
 }
 
 type MessageBody struct {
@@ -60,7 +18,6 @@ type MessageBody struct {
 }
 
 // Mensagem ficará dentro de um packet
-
 type RequestPacket struct {
 	PacketHeader RequestPacketHeader
 	PacketBody   RequestPacketBody
@@ -73,6 +30,7 @@ type RequestPacketHeader struct {
 	Exchange_type    string
 	Exchange_durable bool
 	Bind_keys        string
+	Mandatory_flag   bool
 }
 
 type RequestPacketBody struct {

@@ -60,6 +60,7 @@ func (qmp *BrokerProxy) Basic_Publish(nameExchange string, routingKey string, ms
 	packet.PacketHeader.Exchange_name = nameExchange
 	packet.PacketHeader.Bind_keys = routingKey
 	packet.PacketHeader.Operation = "publish"
+	message.HeaderMsg.Life_Time = 60000 * 5 // Tempo em segundo
 	packet.PacketBody.Message = *message
 
 	for true {
@@ -77,7 +78,7 @@ func (qmp *BrokerProxy) Queue_Declare(nameQueue string) {
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
 
-	message.HeaderMsg.DestinationQueue = nameQueue
+	message.HeaderMsg.Destination_Queue = nameQueue
 	packet.PacketBody.Message = *message
 	packet.PacketHeader.Operation = "create_queue"
 
@@ -96,7 +97,7 @@ func (qmp *BrokerProxy) Queue_Bind(nameExchange string, nameQueue string, routin
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
 
-	message.HeaderMsg.DestinationQueue = nameQueue
+	message.HeaderMsg.Destination_Queue = nameQueue
 
 	packet.PacketHeader.Operation = "bind_queue"
 	packet.PacketHeader.Exchange_name = nameExchange

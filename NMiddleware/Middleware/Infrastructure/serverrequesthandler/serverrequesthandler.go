@@ -26,7 +26,6 @@ func NewServerRequestHandler(host string, port int) ServerRequestHandler {
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
-
 	return *srh
 }
 

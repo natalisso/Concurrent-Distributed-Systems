@@ -121,7 +121,7 @@ func (qm *Broker) Receive() {
 		qm.srh.Send(marshall.Marshall(*pckgReply), conn, true)
 
 	} else if packetRcv.PacketHeader.Operation == "create_queue" {
-		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.DestinationQueue
+		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.Destination_Queue
 		nExist := true
 		for nQueue := range qm.Queues {
 			if nQueue == nameQueue {
@@ -131,6 +131,9 @@ func (qm *Broker) Receive() {
 		if nExist {
 			// MUTEX AQUI
 			qm.Queues[nameQueue] = queue.NewQueue()
+		} else {
+			// Envio para ele todas as mensagem que já existiam na fila
+
 		}
 		pckgReply := new(miop.RequestPacket)
 		pckgReply.PacketBody.Message.BodyMsg.Body = "queue created"
@@ -138,7 +141,7 @@ func (qm *Broker) Receive() {
 
 	} else if packetRcv.PacketHeader.Operation == "bind_queue" {
 		nameExg := packetRcv.PacketHeader.Exchange_name
-		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.DestinationQueue
+		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.Destination_Queue
 		bindKey := packetRcv.PacketHeader.Bind_keys
 
 		if _, exist := qm.Exchange[nameExg]; exist {
