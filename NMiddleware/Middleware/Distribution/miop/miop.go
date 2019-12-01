@@ -8,9 +8,9 @@ type Message struct {
 }
 
 type MessageHeader struct {
-	Destination_Queue string
-	Life_Time         int
-	Content_Type      string
+	Destination_queue string
+	Life_time         int
+	Content_type      string
 }
 
 type MessageBody struct {

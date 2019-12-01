@@ -50,7 +50,7 @@ func (qmp *BrokerProxy) Exchange_Declare(nameExchange string, typeExchange strin
 	}
 }
 
-func (qmp *BrokerProxy) Basic_Publish(nameExchange string, routingKey string, msg string) {
+func (qmp *BrokerProxy) basic_Publish(nameExchange string, routingKey string, msg string) {
 	qmp.ConnectionBroker()
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)

@@ -1,13 +1,13 @@
 package broker
 
 import (
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/exchange"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/marshaller"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/miop"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/queue"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Infrastructure/serverrequesthandler"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Infrastructure/subscribermanager"
-	"Concurrent-Distributed-Systems/NMiddleware/shared"
+	"NMiddleware/Middleware/Distribution/exchange"
+	"NMiddleware/Middleware/Distribution/marshaller"
+	"NMiddleware/Middleware/Distribution/miop"
+	"NMiddleware/Middleware/Distribution/queue"
+	"NMiddleware/Middleware/Infrastructure/serverrequesthandler"
+	"NMiddleware/Middleware/Infrastructure/subscribermanager"
+	"NMiddleware/shared"
 	"fmt"
 )
 

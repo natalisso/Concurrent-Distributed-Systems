@@ -1,8 +1,8 @@
 package main
 
 import (
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/brokerproxy"
-	"Concurrent-Distributed-Systems/NMiddleware/shared"
+	"NMiddleware/Middleware/Distribution/brokerproxy"
+	"NMiddleware/shared"
 	"fmt"
 )
 
@@ -17,7 +17,7 @@ func main() {
 	fmt.Println("Ready to send a message")
 	fmt.Scanln()
 	for i := 0; i < 10000; i++ {
-		bp.Basic_Publish("Direct-X", "Key1", msg)
+		bp.Basic_Publish("Direct-X", "Key_dir", msg)
 	}
 
 	fmt.Scanln()
