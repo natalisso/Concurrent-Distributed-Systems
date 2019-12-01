@@ -52,6 +52,7 @@ type Message struct {
 type MessageHeader struct {
 	// Nome da fila onde a mensagem será armazenada
 	DestinationQueue string
+	lifeTime         int
 }
 
 type MessageBody struct {

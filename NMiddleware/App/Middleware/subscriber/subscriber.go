@@ -3,7 +3,8 @@ package main
 import (
 	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/brokerproxy"
 	"Concurrent-Distributed-Systems/NMiddleware/shared"
-	"fmt"
+	"log"
+	"os"
 )
 
 // CONSUMIDOR
@@ -14,7 +15,14 @@ func main() {
 	bp.Queue_Declare("Direct-Q")
 	bp.Queue_Bind("Direct-X", "Direct-Q", "Key1")
 
-	for true {
-		fmt.Printf("Received: %s\n", bp.Basic_Consume("Direct-Q"))
+	f, err := os.Create("./s")
+	if err != nil {
+		log.Fatalf("Error")
 	}
+
+	for i := 0; i < 20000; i++ {
+		f.WriteString(bp.Basic_Consume("Direct-Q"))
+		//fmt.Printf("Received: %s\n", bp.Basic_Consume("Direct-Q"))
+	}
+	f.Close()
 }

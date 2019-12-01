@@ -98,12 +98,16 @@ func (qm *Broker) Receive() {
 
 				fmt.Printf("mensagens na fila %s, dps do enqueue: %d\n", queuesNames[i], len(qm.Queues[queuesNames[i]].Queue))
 			}
+			fmt.Printf("VOU ENVIAR PRO CLIENTE\n")
 			qm.send(packetRcv, queuesNames)
 		} else {
 			fmt.Println("Discarted message!!!!")
 		}
 
-		conn.Close()
+		pckgReply := new(miop.RequestPacket)
+		pckgReply.PacketBody.Message.BodyMsg.Body = "publish received"
+		qm.srh.Send(marshall.Marshall(*pckgReply), conn, true)
+
 	} else if packetRcv.PacketHeader.Operation == "create_exchange" {
 		if _, exist := qm.Exchange[packetRcv.PacketHeader.Exchange_name]; !exist {
 			qm.Exchange[packetRcv.PacketHeader.Exchange_name] = exchange.NewExchange(packetRcv.PacketHeader.Exchange_type, packetRcv.PacketHeader.Exchange_durable)
@@ -112,7 +116,10 @@ func (qm *Broker) Receive() {
 			fmt.Printf("Exchange: %s already exist!\n", packetRcv.PacketHeader.Exchange_name)
 		}
 
-		conn.Close()
+		pckgReply := new(miop.RequestPacket)
+		pckgReply.PacketBody.Message.BodyMsg.Body = "exchange created"
+		qm.srh.Send(marshall.Marshall(*pckgReply), conn, true)
+
 	} else if packetRcv.PacketHeader.Operation == "create_queue" {
 		nameQueue := packetRcv.PacketBody.Message.HeaderMsg.DestinationQueue
 		nExist := true
@@ -125,11 +132,9 @@ func (qm *Broker) Receive() {
 			// MUTEX AQUI
 			qm.Queues[nameQueue] = queue.NewQueue()
 		}
-
-		if !nExist {
-
-		}
-		// O Subscriber irá criar a fila, caso não exista, e com isso será associado a ela de qualquer modo.
+		pckgReply := new(miop.RequestPacket)
+		pckgReply.PacketBody.Message.BodyMsg.Body = "queue created"
+		qm.srh.Send(marshall.Marshall(*pckgReply), conn, true)
 
 	} else if packetRcv.PacketHeader.Operation == "bind_queue" {
 		nameExg := packetRcv.PacketHeader.Exchange_name
@@ -148,5 +153,8 @@ func (qm *Broker) Receive() {
 			fmt.Printf("Exchange: %s Doesn't exist!!!\n", nameExg)
 		}
 
+		pckgReply := new(miop.RequestPacket)
+		pckgReply.PacketBody.Message.BodyMsg.Body = "queue binded"
+		qm.srh.Send(marshall.Marshall(*pckgReply), conn, false)
 	}
 }

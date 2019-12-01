@@ -40,7 +40,14 @@ func (qmp *BrokerProxy) Exchange_Declare(nameExchange string, typeExchange strin
 	packet.PacketHeader.Exchange_type = typeExchange
 	packet.PacketBody.Message = *message
 
-	qmp.send(*packet)
+	for true {
+		qmp.send(*packet)
+		reply := qmp.receive()
+		fmt.Printf("Reply: %s\n", reply)
+		if reply == "exchange created" {
+			break
+		}
+	}
 }
 
 func (qmp *BrokerProxy) Basic_Publish(nameExchange string, routingKey string, msg string) {
@@ -55,7 +62,14 @@ func (qmp *BrokerProxy) Basic_Publish(nameExchange string, routingKey string, ms
 	packet.PacketHeader.Operation = "publish"
 	packet.PacketBody.Message = *message
 
-	qmp.send(*packet)
+	for true {
+		qmp.send(*packet)
+		reply := qmp.receive()
+		fmt.Printf("Reply: %s\n", reply)
+		if reply == "publish received" {
+			break
+		}
+	}
 }
 
 func (qmp *BrokerProxy) Queue_Declare(nameQueue string) {
@@ -66,7 +80,15 @@ func (qmp *BrokerProxy) Queue_Declare(nameQueue string) {
 	message.HeaderMsg.DestinationQueue = nameQueue
 	packet.PacketBody.Message = *message
 	packet.PacketHeader.Operation = "create_queue"
-	qmp.send(*packet)
+
+	for true {
+		qmp.send(*packet)
+		reply := qmp.receive()
+		fmt.Printf("Reply: %s\n", reply)
+		if reply == "queue created" {
+			break
+		}
+	}
 }
 
 func (qmp *BrokerProxy) Queue_Bind(nameExchange string, nameQueue string, routingKey string) {
@@ -81,7 +103,15 @@ func (qmp *BrokerProxy) Queue_Bind(nameExchange string, nameQueue string, routin
 	packet.PacketHeader.Bind_keys = routingKey
 	packet.PacketBody.Message = *message
 
-	qmp.send(*packet)
+	for true {
+		qmp.send(*packet)
+		reply := qmp.receive()
+
+		fmt.Printf("Reply: %s\n", reply)
+		if reply == "queue binded" {
+			break
+		}
+	}
 }
 
 func (qmp *BrokerProxy) Basic_Consume(nameQueue string) string {
