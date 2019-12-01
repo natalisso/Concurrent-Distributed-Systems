@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/broker"
+	"NMiddleware/Middleware/Distribution/broker"
 	"fmt"
 )
 

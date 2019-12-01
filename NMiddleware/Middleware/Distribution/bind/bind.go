@@ -80,6 +80,11 @@ func (bind *Bind) SearchQueue(bindKey string, typeExchange string) []string {
 			if !cont {
 				break
 			}
+		}else if typeExchange == "fanout"{
+			matchs = append(matchs, queue)
+			break
+		}else if typeExchange == "header"{
+			
 		}
 	}
 	return matchs

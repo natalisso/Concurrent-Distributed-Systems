@@ -1,10 +1,11 @@
 package main
 
 import (
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/brokerproxy"
-	"Concurrent-Distributed-Systems/NMiddleware/shared"
+	"NMiddleware/Middleware/Distribution/brokerproxy"
+	"NMiddleware/shared"
 	"log"
 	"os"
+	"fmt"
 )
 
 // CONSUMIDOR
@@ -12,8 +13,8 @@ func main() {
 	bp := brokerproxy.NewBrokerProxy("", true, shared.N_HOST_PB, shared.N_PORT_SB)
 	//bp.ConnectionBroker()
 
-	bp.Queue_Declare("Direct-Q")
-	bp.Queue_Bind("Direct-X", "Direct-Q", "Key1")
+	bp.Queue_Declare("Q1")
+	bp.Queue_Bind("Fanout-X", "Q1", "Key1.*.com")
 
 	f, err := os.Create("./s")
 	if err != nil {
@@ -21,8 +22,8 @@ func main() {
 	}
 
 	for i := 0; i < 20000; i++ {
-		f.WriteString(bp.Basic_Consume("Direct-Q"))
-		//fmt.Printf("Received: %s\n", bp.Basic_Consume("Direct-Q"))
+		// f.WriteString(bp.Basic_Consume("Topic-Q"))
+		fmt.Printf("Received: %s\n", bp.Basic_Consume("Q1"))
 	}
 	f.Close()
 }

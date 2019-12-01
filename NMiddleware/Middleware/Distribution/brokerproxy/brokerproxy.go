@@ -1,10 +1,10 @@
 package brokerproxy
 
 import (
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/marshaller"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Distribution/miop"
-	"Concurrent-Distributed-Systems/NMiddleware/Middleware/Infrastructure/clientrequesthandler"
-	"Concurrent-Distributed-Systems/NMiddleware/shared"
+	"NMiddleware/Middleware/Distribution/marshaller"
+	"NMiddleware/Middleware/Distribution/miop"
+	"NMiddleware/Middleware/Infrastructure/clientrequesthandler"
+	"NMiddleware/shared"
 	"fmt"
 )
 
