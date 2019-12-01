@@ -1,6 +1,9 @@
 package bind
 
-import "fmt"
+import ("fmt"
+		"regexp"
+		"strings"
+)
 
 // Bind ...
 type Bind struct {
@@ -22,13 +25,49 @@ func (bind *Bind) SearchQueue(bindKey string, typeExchange string) []string {
 	matchs := make([]string, 0)
 	cont := true
 	for queue, bkQueue := range bind.bindKeys {
-
 		if typeExchange == "topic" || typeExchange == "" {
+			found := false
 			for i := 0; i < len(bkQueue); i++ {
-				// Aqui irá ser feito a comparação de string e todo trabalho chato
-				// Para verificar se der match, utiliza bkQueue[i], No caso de ser um exchange de TOPIC; Caso dê
-				// faz matchs = append(matchs, queue) e da um break, pra ir p proxima queue
-				fmt.Println(queue) // Dps Tirar esse print, botei só pro go chatoland nao reclamar de erro no codigo
+				if strings.ContainsAny(bkQueue[i], "*"){
+					contains := true
+					_strs := strings.Split(bkQueue[i], "*")
+					for j:= 0; j < len(_strs); j++{
+						if !strings.Contains(bindKey, _strs[j]){
+							fmt.Println("deu ruim!!")
+							contains = false
+							break
+						}
+					} 
+
+					if contains{
+						matchs = append(matchs, queue)
+						found = true
+						fmt.Println("Matched!", "matchs:", matchs)
+					}
+				}else{
+					var result string
+					if strings.HasSuffix(bkQueue[i], "#"){
+						result = strings.Replace(bkQueue[i], "#", "*", -1)
+					}else{
+						result = bkQueue[i]
+					}
+	
+					matched, err := regexp.MatchString(result, bindKey)
+						if err == nil{
+							if matched{
+								matchs = append(matchs, queue)
+								found = true
+								fmt.Println("Matched:", matched, "matchs:", matchs)
+							}else{
+								fmt.Println("Matched:", matched, "DEU RUIM")
+							}
+						}
+				}
+
+				if found{
+					fmt.Println("Next queue!")
+					break
+				}
 			}
 		} else if typeExchange == "direct" {
 			for i := 0; i < len(bkQueue); i++ {
