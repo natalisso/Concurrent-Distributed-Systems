@@ -1,0 +1,20 @@
+1 Cliente:
+-----------------NOSSO-----------------
+média direto = 1.9946165299999996
+desvio Padrão direto = 0.4391334479889678
+média fanout = 1.9846257484210525
+desvio Padrão fanout = 0.4374872234852015
+média topic = 2.064948800631579
+desvio Padrão topic = 0.38483817330265313
+---------------RABBITMQ------------
+média direto = 0.43011707326315785
+desvio Padrão direto = 0.11441982625257725
+média fanout = 0.4220381415789473
+desvio Padrão fanout = 0.10951949106591984
+média topic = 0.412424871368421
+desvio Padrão topic = 0.12178724263487811
+-------NULL HYPOTHESIS TESTING-------
+p1 = 0.0
+p2 = 0.0
+p3 = 0.0
+-------------------------------------

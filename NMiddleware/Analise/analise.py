@@ -6,7 +6,7 @@ from scipy import stats
 
 
 dirpath = os.curdir
-outFile = open(dirpath+'/log.txt', 'w')
+outFile = open(dirpath+'/Analise/log.txt', 'w')
 
 file1 = dirpath+'/Analise/dataBaseDirect.csv'
 file2 = dirpath+'/Analise/dataBaseFanout.csv'
