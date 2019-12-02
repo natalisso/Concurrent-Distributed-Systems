@@ -2,16 +2,14 @@ package serverrequesthandler
 
 import (
 	"encoding/binary"
-	"fmt"
 	"log"
 	"net"
 	"strconv"
 )
 
 type ServerRequestHandler struct {
-	serverHost string
-	serverPort int
-	//	ConnServer     []net.Conn
+	serverHost     string
+	serverPort     int
 	ListenerServer net.Listener
 }
 
@@ -58,8 +56,6 @@ func (srh *ServerRequestHandler) Receive() ([]byte, net.Conn) {
 	if err != nil {
 		log.Fatalf("SRH leitura:: %s", err)
 	}
-
-	fmt.Println("Aceitei conexao")
 
 	// Recebe tamanho da mensagem
 	size := make([]byte, 4)

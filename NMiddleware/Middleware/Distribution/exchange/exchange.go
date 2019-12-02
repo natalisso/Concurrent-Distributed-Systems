@@ -3,6 +3,7 @@ package exchange
 import (
 	"NMiddleware/Middleware/Distribution/bind"
 	"fmt"
+	//"fmt"
 )
 
 type Exchange struct {
@@ -24,10 +25,8 @@ func NewExchange(typ string, durable bool) Exchange {
 func (ex Exchange) FindQueues(bindKey string) []string {
 	// Retorna os nomes das filas
 	var nameQueues []string
-	// OBS: TEM QUE AJEITAR LOGO AS INFORMAÇÕES DO PACOTE E DAS MENSAGENS
-	// TO USANDO OQ TÁ, MAS TEM QUE MUDAR DPS I GUESS
-	if ex.Type == "" || ex.Type == "direct" || ex.Type == "topic" ||  ex.Type == "fanout"  ||  ex.Type == "header" {
-		nameQueues = append(nameQueues, ex.Bind.SearchQueue(bindKey, ex.Type)...) 
+	if ex.Type == "" || ex.Type == "direct" || ex.Type == "topic" || ex.Type == "fanout" || ex.Type == "header" {
+		nameQueues = append(nameQueues, ex.Bind.SearchQueue(bindKey, ex.Type)...)
 	} else {
 		fmt.Println("Invalid Type of Exchange")
 	}

@@ -43,7 +43,6 @@ func ChecaErro(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s!!: %s", msg, err)
 	}
-	//fmt.Println(msg)
 }
 
 func FindNextAvailablePort() int { // TCP only

@@ -5,13 +5,13 @@ import (
 	"NMiddleware/Middleware/Distribution/miop"
 	"NMiddleware/Middleware/Infrastructure/clientrequesthandler"
 	"NMiddleware/shared"
-	"fmt"
+	//	"fmt"
 )
 
 type BrokerProxy struct {
 	queueName string
 	crh       clientrequesthandler.ClientRequestHandler
-	host      string // ESSE É DO PUBLISH/SUBSCRIBER
+	host      string
 	port      int
 }
 
@@ -27,7 +27,6 @@ func NewBrokerProxy(qName string, perst bool, myHost string, myPort int) BrokerP
 
 func (qmp *BrokerProxy) ConnectionBroker() {
 	qmp.crh.Connection()
-	fmt.Println("Connected to Server")
 }
 
 func (qmp *BrokerProxy) Exchange_Declare(nameExchange string, typeExchange string) {
@@ -43,7 +42,6 @@ func (qmp *BrokerProxy) Exchange_Declare(nameExchange string, typeExchange strin
 	for true {
 		qmp.send(*packet)
 		reply := qmp.receive()
-		fmt.Printf("Reply: %s\n", reply)
 		if reply == "exchange created" {
 			break
 		}
@@ -66,7 +64,6 @@ func (qmp *BrokerProxy) Basic_Publish(nameExchange string, routingKey string, ms
 	for true {
 		qmp.send(*packet)
 		reply := qmp.receive()
-		fmt.Printf("Reply: %s\n", reply)
 		if reply == "publish received" {
 			break
 		}
@@ -85,7 +82,6 @@ func (qmp *BrokerProxy) Queue_Declare(nameQueue string) {
 	for true {
 		qmp.send(*packet)
 		reply := qmp.receive()
-		fmt.Printf("Reply: %s\n", reply)
 		if reply == "queue created" {
 			break
 		}
@@ -93,7 +89,7 @@ func (qmp *BrokerProxy) Queue_Declare(nameQueue string) {
 }
 
 func (qmp *BrokerProxy) Queue_Bind(nameExchange string, nameQueue string, routingKey string) {
-	qmp.ConnectionBroker() // essa vai ser salva pra ler dps
+	qmp.ConnectionBroker()
 	packet := new(miop.RequestPacket)
 	message := new(miop.Message)
 
@@ -108,7 +104,6 @@ func (qmp *BrokerProxy) Queue_Bind(nameExchange string, nameQueue string, routin
 		qmp.send(*packet)
 		reply := qmp.receive()
 
-		fmt.Printf("Reply: %s\n", reply)
 		if reply == "queue binded" {
 			break
 		}
@@ -119,17 +114,12 @@ func (qmp *BrokerProxy) Basic_Consume(nameQueue string) string {
 	return qmp.receive()
 }
 
-// Cliente (produtor/ consumidor) está enviando uma mensagem pro serviço de mensageria
 func (qmp *BrokerProxy) send(pckg miop.RequestPacket) {
 	marshaller := new(marshaller.Marshaller)
 	qmp.crh.Send(marshaller.Marshall(pckg))
 }
 
-// Cliente (produtor/ consumidor) está recebendo uma mensagem do serviço de mensageria
 func (qmp *BrokerProxy) receive() string {
-	//crh := clientrequesthandler.NewClientRequestHandler(shared.N_HOST, shared.NAMING_PORT, false)
-	// srh := serverrequesthandler.NewServerRequestHandler(qmp.host, qmp.port)
 	marshaller := new(marshaller.Marshaller)
-
 	return marshaller.Unmarshall(qmp.crh.Receive()).PacketBody.Message.BodyMsg.Body
 }

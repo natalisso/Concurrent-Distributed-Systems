@@ -21,7 +21,7 @@ func main() {
 		log.Fatalf("Error")
 	}
 
-	for i := 0; i < 20000; i++ {
+	for i := 0; i < 10000; i++ {
 		// f.WriteString(bp.Basic_Consume("Topic-Q"))
 		fmt.Printf("Received: %s\n", bp.Basic_Consume("Q1"))
 	}

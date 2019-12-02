@@ -1,7 +1,5 @@
 package miop
 
-// ------------------------------
-
 type Message struct {
 	HeaderMsg MessageHeader
 	BodyMsg   MessageBody
@@ -37,7 +35,3 @@ type RequestPacketBody struct {
 	Parameters []interface{}
 	Message    Message
 }
-
-// Enquanto message é usada para comunicação entre as aplicações (produtor/consumidor)
-//, packet é usado para comunicação cliente/servidor dos consumidores e produtores (clientes)
-// com o servidor de fila (servidor).

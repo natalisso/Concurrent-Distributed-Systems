@@ -7,7 +7,7 @@ type Subscriber struct {
 	Addr net.Addr
 }
 type SubscriberManager struct {
-	subsQueue map[string][]Subscriber // Pelo nome da fila sei quem tá inscrito
+	subsQueue map[string][]Subscriber
 }
 
 // NewSubscriber ...

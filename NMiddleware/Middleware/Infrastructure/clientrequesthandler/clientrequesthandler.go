@@ -57,10 +57,6 @@ func (crh *ClientRequestHandler) Send(msgToSend []byte) {
 		log.Fatalf("CRH:: %s", err)
 	}
 
-	// Salvo a conexão para poder lê-la depois, caso necessário
-	// if crh.expectedReply {
-	// 	crh.clientSocket = conn
-	//
 }
 
 // Receive recebe os bytes
