@@ -1,0 +1,16 @@
+Showing nodes accounting for 60ms, 600.00% of 10ms total
+Dropped 247 nodes (cum <= 0.05ms)
+Showing top 10 nodes out of 148
+      flat  flat%   sum%        cum   cum%
+      10ms   100%   100%       10ms   100%  main.main
+         0     0%   100%       10ms   100%  runtime.main
+      10ms   100% 200.00%       10ms   100%  NMiddleware/Middleware/Distribution/brokerproxy.(*BrokerProxy).Basic_Publish
+         0     0% 200.00%       10ms   100%  NMiddleware/Middleware/Distribution/brokerproxy.(*BrokerProxy).ConnectionBroker
+      10ms   100% 300.00%       10ms   100%  NMiddleware/Middleware/Infrastructure/clientrequesthandler.(*ClientRequestHandler).Connection
+         0     0% 300.00%       10ms   100%  net.(*Dialer).Dial
+      10ms   100% 400.00%       10ms   100%  net.(*Dialer).DialContext
+         0     0% 400.00%       10ms   100%  net.Dial
+      10ms   100% 500.00%       10ms   100%  syscall.Syscall
+      10ms   100% 600.00%       10ms   100%  net.(*sysDialer).dialSerial
+
+

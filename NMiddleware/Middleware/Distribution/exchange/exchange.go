@@ -3,7 +3,6 @@ package exchange
 import (
 	"NMiddleware/Middleware/Distribution/bind"
 	"fmt"
-	//"fmt"
 )
 
 type Exchange struct {

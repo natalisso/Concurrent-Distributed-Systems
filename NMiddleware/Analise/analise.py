@@ -8,12 +8,12 @@ from scipy import stats
 dirpath = os.curdir
 outFile = open(dirpath+'/Analise/log.txt', 'w')
 
-file1 = dirpath+'/Analise/dataBaseDirect.csv'
-file2 = dirpath+'/Analise/dataBaseFanout.csv'
-file3 = dirpath+'/Analise/dataBaseTopic.csv'
-file4 = dirpath+'/Analise/dataBaseDirect1.csv'
-file5 = dirpath+'/Analise/dataBaseFanout1.csv'
-file6 = dirpath+'/Analise/dataBaseTopic1.csv'
+file1 = dirpath+'/Analise/Nosso/dataBaseDirect.csv'
+file2 = dirpath+'/Analise/Nosso/dataBaseFanout.csv'
+file3 = dirpath+'/Analise/Nosso/dataBaseTopic.csv'
+file4 = dirpath+'/Analise/Rabbitmq/dataBaseDirect1.csv'
+file5 = dirpath+'/Analise/Rabbitmq/dataBaseFanout1.csv'
+file6 = dirpath+'/Analise/Rabbitmq/dataBaseTopic1.csv'
 
 df = pd.read_csv(file1)
 df2 = pd.read_csv(file2)
