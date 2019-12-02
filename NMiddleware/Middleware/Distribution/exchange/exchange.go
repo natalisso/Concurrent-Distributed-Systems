@@ -25,7 +25,7 @@ func NewExchange(typ string, durable bool) Exchange {
 func (ex Exchange) FindQueues(bindKey string) []string {
 	// Retorna os nomes das filas
 	var nameQueues []string
-	if ex.Type == "" || ex.Type == "direct" || ex.Type == "topic" || ex.Type == "fanout" || ex.Type == "header" {
+	if ex.Type == "" || ex.Type == "direct" || ex.Type == "topic" || ex.Type == "fanout" {
 		nameQueues = append(nameQueues, ex.Bind.SearchQueue(bindKey, ex.Type)...)
 	} else {
 		fmt.Println("Invalid Type of Exchange")
